@@ -307,9 +307,33 @@ object sfs_read( char *input, uint *here ) {
 
 object sfs_read_atom( char *input, uint *here ) {
 
-    object atom = NULL;
+    object atom;
+    char caractere[256];
+    int i = 0;
+    if(isblank(input[*here]) != 0) { //si le caractère est 1 espace on avance d'1 cran
+        (*here)++;
+    }
+    else{
+        if(isdigit(input[*here]) != 0){ //un digit ?
+            ajout_char(input,caractere,here,i);
+            i++;
+            (*here)++;
+            while(isdigit(input[*here]) != 0){
+                ajout_char(input,caractere,here,i);
+                i++;
+                (*here)++;
+            }
+            if(isblank(input[*here]) != 0) {
+                atom = make_object(SFS_NUMBER);
+                atom->this.number.numtype = NUM_INTEGER;
+                atom->this.number.this.integer = atoi(caractere);
+                return atom;
+            }
+            else{
+                return nil;
 
-    return atom;
+(.........)
+    
 }
 
 object sfs_read_pair( char *stream, uint *i ) {
