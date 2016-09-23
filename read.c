@@ -331,17 +331,23 @@ object sfs_read_atom( char *input, uint *here ) {
             }
             else{
                 return nil;
+                
+                
+                
+                
+                
 
 (.........)
-  // HASHTAG 23/09
-   if (input[*here]=='#') {
+ 
+        // pour le hastag :
+	if (input[*here]=='#') {
 
 		if ((input[*here+1] ==t)||if (input[*here+1] ==f)) {
 			
 			if (input[*here+1]==t) {
 				if(isblank(input[*here+2]) != 0)  {	
 					atome=make_object(5);
-					atome->this.num.this.integer = 1;} }
+					atome->this.bolean = z;} }    // cf P.39 du projet info 
 			if (input[*here+1]=f) {
 				if(isblank(input[*here+2]) != 0) {
 					atome=make_object(5);
@@ -354,28 +360,53 @@ object sfs_read_atom( char *input, uint *here ) {
 		if(input[*here]!='\') {
 
 	        return EXIT_FAILLURE }
+		here++;
 
-		if (isalpha((input[*here])==0 & (isalnum(input[*here]))=0) {
+		if (isalpha((input[*here])==0 && (isalnum(input[*here]))=0) {
 			puts('probleme lors de l'ecriture d'un caractère')
 			return EXIT_FAILLURE }
 
 			else  {
 				
-				ajout_char(input, here, i); // on strockes les carachere dans un tableau
+			if (input[*here]=n) & (input[*here+1]=e) & (input[*here+2]=w) & (input[*here+3]=l) & (input[*here+4]=i) & (input[*here+5]=n) & (input[*here+6]=e) {
+				fonction_new_line(input, here); } // comment faire une nouvelle ligne 
+
+			if (input[*here]=s) & (input[*here+1]=p) & (input[*here+2]=a) & (input[*here+3]=c) & (input[*here+4]=e) {
+				here++; }
+
+				do
+				ajout_char(input, here, i); // on strockes les carachere dans un tableau, bien ?
 				*here=*here+1;
 				i++;
 				while(isalpha(input[*here]!=0) || (isalnum(input[*here]))!=0) }
 
+
 			if(isblank(input[*here]) != 0) {
 				atom = make_object(SFS_CHARACTER);
-				atom->this.character = strtol(charact); // demander atoi pour des caractheres
+				atom->this.character = strtol(charact); // demander atoi pour des caractheres, et \0 tjrs? 
 				return atom; }
 			else {
 				return nil;
 
 			}
 
-}
+						#include <stdlib.h>
+						#include <stdio.h>
+						// stocker les caractères.
+						
+						 char * creer_char(char *input, uint *ici, uint i) 
+						{
+						charact[i]=input[*ici]; // on les stocke dans un tableau alloué 256
+						return charact;
+						}
+
+
+
+
+
+
+
+
 
 object sfs_read_pair( char *stream, uint *i ) {
 
