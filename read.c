@@ -333,7 +333,48 @@ object sfs_read_atom( char *input, uint *here ) {
                 return nil;
 
 (.........)
-    
+  // HASHTAG 23/09
+   if (input[*here]=='#') {
+
+		if ((input[*here+1] ==t)||if (input[*here+1] ==f)) {
+			
+			if (input[*here+1]==t) {
+				if(isblank(input[*here+2]) != 0)  {	
+					atome=make_object(5);
+					atome->this.num.this.integer = 1;} }
+			if (input[*here+1]=f) {
+				if(isblank(input[*here+2]) != 0) {
+					atome=make_object(5);
+					atome->this.num.this.integer= 0; }}
+				
+			here++;
+			
+		}
+
+		if(input[*here]!='\') {
+
+	        return EXIT_FAILLURE }
+
+		if (isalpha((input[*here])==0 & (isalnum(input[*here]))=0) {
+			puts('probleme lors de l'ecriture d'un caractère')
+			return EXIT_FAILLURE }
+
+			else  {
+				
+				ajout_char(input, here, i); // on strockes les carachere dans un tableau
+				*here=*here+1;
+				i++;
+				while(isalpha(input[*here]!=0) || (isalnum(input[*here]))!=0) }
+
+			if(isblank(input[*here]) != 0) {
+				atom = make_object(SFS_CHARACTER);
+				atom->this.character = strtol(charact); // demander atoi pour des caractheres
+				return atom; }
+			else {
+				return nil;
+
+			}
+
 }
 
 object sfs_read_pair( char *stream, uint *i ) {
