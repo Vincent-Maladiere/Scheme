@@ -289,7 +289,8 @@ uint  sfs_get_sexpr( char *input, FILE *fp ) {
 
 
 object sfs_read( char *input, uint *here ) {
-
+object arbre = make_object(SFS_PAIR);
+	
     if ( input[*here] == '(' ) {
         if ( input[(*here)+1] == ')' ) {
             *here += 2;
@@ -383,7 +384,7 @@ object sfs_read_atom( char *input, uint *here ) {
     return atom;
 }
 
-/*#include <stdlib.h>
+*#include <stdlib.h>
 #include <stdio.h>
 // stocker les caractères.
 						
@@ -395,6 +396,42 @@ char * creer_char(char *input, uint *ici, uint i) {
 object sfs_read_pair( char *stream, uint *i ) {
 
     object pair = NULL;
+	i++;
+
+	if stream[*i]=''' {
+		if stream[*i+1]='(' {
+			 i+2;
+			 read(stream, i); // retourne atome de type object 
+			 atom = make_object(SFS_PAIR); 
+				// read_atome ? 
+                         atom->this.pair_t.car =;
+			 i++;
+			 read(stream,i);
+			 atom->this.pair_t.cdr= stream[*i];
+
+				i++;
+				
+		else {return nil}
+		
+		fonction
+	if ((stream[*i]=='q') && (stream[*i+1]=='u') && (stream[*i+2]=='o') && (stream[*i+3]=='t') && (stream[*i+4]='e')) {
+		i=+5;
+		while (isblank(stream[*i]=0)) {
+		i++; }
+		if (stream[*i+1]!='(')
+		
+
+
+	else { 
+		
+	
+
+    object pair = NULL;
+
+    return pair;
+}
+	
+    
 
     return pair;
 }
