@@ -307,6 +307,8 @@ object sfs_read( char *input, uint *here ) {
 
 object sfs_read_atom( char *input, uint *here ) {
 
+    object sfs_read_atom( char *input, uint *here ) {
+    
     object atom;
     char caractere[256];
     int i = 0;
@@ -314,99 +316,81 @@ object sfs_read_atom( char *input, uint *here ) {
         (*here)++;
     }
     else{
-        if(isdigit(input[*here]) != 0){ //un digit ?
-            ajout_char(input,caractere,here,i);
+        
+        if((isdigit(input[*here]) != 0)||(input[*here] == '+')||(input[*here] == '-')){ //un digit, +, - ?
+            caractere[i] = input[*here]; //pas besoin de fonction pour 1 ligne
             i++;
             (*here)++;
-            while(isdigit(input[*here]) != 0){
-                ajout_char(input,caractere,here,i);
+            while(isdigit(input[*here]) != 0){ //tant que des digits sont détectés, on les intègre dans le char
+                caractere[i] = input[*here];
                 i++;
                 (*here)++;
             }
-            if(isblank(input[*here]) != 0) {
+            if(isblank(input[*here]) != 0) { //si la fin du while est causée par un espace, c'est un nombre !
                 atom = make_object(SFS_NUMBER);
                 atom->this.number.numtype = NUM_INTEGER;
                 atom->this.number.this.integer = atoi(caractere);
-                return atom;
             }
-            else{
-                return nil;
-                
-                
-                
-                
-                
+        }
+        if((input[*here]) == '"'){ //boucle string
+            (*here)++;
+            while(isalpha(input[*here]) != 0){
+                caractere[i] = input[*here];
+                i++;
+                (*here)++;
+            }
+            if((input[*here] == '"')&&(isblank(input[*here+1]) != 0)){ //avec le duo guillemet+espace : str !
+                atom = make_object(SFS_STRING);
+                strcpy(atom->this.string,caractere); //on met le mot string formé par caractère dans le this
+                atom->this.string[i+1] = '\0'; //toujours placé à la fin du string
+            }
+            
+        }
+        if(input[*here] == '#'){
+            (*here)++;
+            if(input[*here] == '\''){
+                if ((input[*here]=='n') && (input[*here+1]=='e') && (input[*here+2]=='w') && (input[*here+3]=='l') && (input[*here+4]=='i') && (input[*here+5]=='n') && (input[*here+6]=='e') && (isblank(input[*here]) != 0)) {
+                    atom = make_object(SFS_SYMBOL); //Est-ce vraiment un symbol ? un string maybe ?
+                    char str1[256] = {'\n'};
+                    strcpy(atom->this.string,str1);
+                }
+                if ((input[*here]=='s') && (input[*here+1]=='p') && (input[*here+2]=='a') && (input[*here+3]=='c') && (input[*here+4]=='e')) {
+                    atom = make_object(SFS_SYMBOL);
+                    char str1[256] = {' '};
+                    strcpy(atom->this.string,str1);
+               
+                }
+                if((isalpha(input[*here]) != 0)&&(isblank(input[*here+1]) != 0)){ //1 lettre + 1 espace = caractere
+                    atom = make_object(SFS_CHARACTER);
+                    atom->this.character = input[*here]; //en supposant qu'une seule lettre soit possible, #\a ok mais pas #\ab
+                }
+        
+            }
+            if((input[*here] == 't')||(input[*here] == 'f')){
+                (*here)++;
+                if(isblank(input[*here] != 0)){
+                    atom = make_object(SFS_BOOLEAN); //True = 1 , False = 0
+                    atom->this.number.numtype = NUM_INTEGER;
+                    atom->this.number.this.integer = (input[*here] == 't') ? 1 : 0;
+                }
+            }
+        }
+        else{
+                atom = nil;
+        }
+        
+    }
+    return atom;
+}
 
-(.........)
- 
-        // pour le hastag :
-	if (input[*here]=='#') {
-
-		if ((input[*here+1] ==t)||if (input[*here+1] ==f)) {
-			
-			if (input[*here+1]==t) {
-				if(isblank(input[*here+2]) != 0)  {	
-					atome=make_object(5);
-					atome->this.bolean = z;} }    // cf P.39 du projet info 
-			if (input[*here+1]=f) {
-				if(isblank(input[*here+2]) != 0) {
-					atome=make_object(5);
-					atome->this.num.this.integer= 0; }}
-				
-			here++;
-			
-		}
-
-		if(input[*here]!='\') {
-
-	        return EXIT_FAILLURE }
-		here++;
-
-		if (isalpha((input[*here])==0 && (isalnum(input[*here]))=0) {
-			puts('probleme lors de l'ecriture d'un caractère')
-			return EXIT_FAILLURE }
-
-			else  {
-				
-			if (input[*here]=n) & (input[*here+1]=e) & (input[*here+2]=w) & (input[*here+3]=l) & (input[*here+4]=i) & (input[*here+5]=n) & (input[*here+6]=e) {
-				fonction_new_line(input, here); } // comment faire une nouvelle ligne 
-
-			if (input[*here]=s) & (input[*here+1]=p) & (input[*here+2]=a) & (input[*here+3]=c) & (input[*here+4]=e) {
-				here++; }
-
-				do
-				ajout_char(input, here, i); // on strockes les carachere dans un tableau, bien ?
-				*here=*here+1;
-				i++;
-				while(isalpha(input[*here]!=0) || (isalnum(input[*here]))!=0) }
-
-
-			if(isblank(input[*here]) != 0) {
-				atom = make_object(SFS_CHARACTER);
-				atom->this.character = strtol(charact); // demander atoi pour des caractheres, et \0 tjrs? 
-				return atom; }
-			else {
-				return nil;
-
-			}
-
-						#include <stdlib.h>
-						#include <stdio.h>
-						// stocker les caractères.
+/*#include <stdlib.h>
+#include <stdio.h>
+// stocker les caractères.
 						
-						 char * creer_char(char *input, uint *ici, uint i) 
-						{
-						charact[i]=input[*ici]; // on les stocke dans un tableau alloué 256
-						return charact;
-						}
-
-
-
-
-
-
-
-
+char * creer_char(char *input, uint *ici, uint i) {
+	charact[i]=input[*ici]; // on les stocke dans un tableau alloué 256
+	return charact;
+}
 
 object sfs_read_pair( char *stream, uint *i ) {
 
@@ -414,4 +398,4 @@ object sfs_read_pair( char *stream, uint *i ) {
 
     return pair;
 }
-
+*/
