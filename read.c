@@ -394,8 +394,23 @@ char * creer_char(char *input, uint *ici, uint i) {
 }
 
 object sfs_read_pair( char *stream, uint *i ) {
+    object pair = make_object(SFS_PAIR);
+    pair->this.pair.car = sfs_read(stream,i);
+    while((stream[*i] =! ')')){
+        i++;
+    }
+    pair->this.pair.cdr = sfs_read(stream,i);
+    
+    return pair;
+}
 
-    object pair = NULL;
+	
+	
+	
+	
+	
+	
+	/*object pair = NULL;
 	i++;
 
 	if stream[*i]=''' {
