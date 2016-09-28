@@ -289,8 +289,7 @@ uint  sfs_get_sexpr( char *input, FILE *fp ) {
 
 
 object sfs_read( char *input, uint *here ) {
-object arbre = make_object(SFS_PAIR);
-	
+    
     if ( input[*here] == '(' ) {
         if ( input[(*here)+1] == ')' ) {
             *here += 2;
@@ -306,9 +305,23 @@ object arbre = make_object(SFS_PAIR);
     }
 }
 
-object sfs_read_atom( char *input, uint *here ) {
 
-    object sfs_read_atom( char *input, uint *here ) {
+/*char * ajout_char(char * input, char * caractere, uint *ici, int i){
+    caractere[i] = input[*ici];
+    return caractere;
+    }
+*/
+
+/*char make_string(char w[], int size){
+    char string[100];
+    strncpy(string, w, size);
+    string[size] = '\0';
+    //printf("res : %s \n",string);
+    return string;
+}*/
+
+
+object sfs_read_atom( char *input, uint *here ) {
     
     object atom;
     char caractere[256];
@@ -383,16 +396,10 @@ object sfs_read_atom( char *input, uint *here ) {
     }
     return atom;
 }
-
-*#include <stdlib.h>
-#include <stdio.h>
-// stocker les caractères.
-						
-char * creer_char(char *input, uint *ici, uint i) {
-	charact[i]=input[*ici]; // on les stocke dans un tableau alloué 256
-	return charact;
-}
-
+        
+        
+        
+        
 object sfs_read_pair( char *stream, uint *i ) {
     object pair = make_object(SFS_PAIR);
     pair->this.pair.car = sfs_read(stream,i);
@@ -403,6 +410,7 @@ object sfs_read_pair( char *stream, uint *i ) {
     
     return pair;
 }
+
 
 	
 	
