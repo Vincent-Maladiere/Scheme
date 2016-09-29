@@ -304,6 +304,22 @@ object sfs_read( char *input, uint *here ) {
     }
 }
 
+
+/*char * ajout_char(char * input, char * caractere, uint *ici, int i){
+    caractere[i] = input[*ici];
+    return caractere;
+    }
+*/
+
+/*char make_string(char w[], int size){
+    char string[100];
+    strncpy(string, w, size);
+    string[size] = '\0';
+    //printf("res : %s \n",string);
+    return string;
+}*/
+
+
 object sfs_read_atom( char *input, uint *here ) {
     
     object atom;
@@ -314,40 +330,40 @@ object sfs_read_atom( char *input, uint *here ) {
     }
     else{
         
-        if((isdigit(input[*here]))||(input[*here] == '+')||(input[*here] == '-')){ //un digit, +, - ?
-            caractere[i] = input[*here]; //pas besoin de fonction pour 1 ligne
+        if((isdigit(input[*here]))||(input[*here] == '+')||(input[*here] == '-')){ /*boucle digit*/
+            caractere[i] = input[*here];
             i++;
             (*here)++;
-            while(isdigit(input[*here])){ //tant que des digits sont détectés, on les intègre dans le char
+            while(isdigit(input[*here])){ /*tant que des digits sont détectés, on les intègre dans le char*/
                 caractere[i] = input[*here];
                 i++;
                 (*here)++;
             }
-            if(isblank(input[*here])) { //si la fin du while est causée par un espace, c'est un nombre !
+            if(isblank(input[*here])) { /*si la fin du while est causée par un espace, c'est un nombre !*/
                 atom = make_object(SFS_NUMBER);
                 atom->this.number.numtype = NUM_INTEGER;
                 atom->this.number.this.integer = atoi(caractere);
             }
         }
-        if((input[*here]) == '"'){ //boucle string
+        if((input[*here]) == '"'){ /*boucle string*/
             (*here)++;
             while(isalpha(input[*here])){
                 caractere[i] = input[*here];
                 i++;
                 (*here)++;
             }
-            if((input[*here] == '"')&&(isblank(input[*here+1]))){ //avec le duo guillemet+espace : str !
+            if((input[*here] == '"')&&(isblank(input[*here+1]))){
                 atom = make_object(SFS_STRING);
-                strcpy(atom->this.string,caractere); //on met le mot string formé par caractère dans le this
-                atom->this.string[i+1] = '\0'; //toujours placé à la fin du string
+                strcpy(atom->this.string,caractere);
+                atom->this.string[i+1] = '\0'; /*toujours placé à la fin du string*/
             }
             
         }
-        if(input[*here] == '#'){
+        if(input[*here] == '#'){ /*boucle caractere*/
             (*here)++;
             if(input[*here] == '\''){
                 if ((input[*here]=='n') && (input[*here+1]=='e') && (input[*here+2]=='w') && (input[*here+3]=='l') && (input[*here+4]=='i') && (input[*here+5]=='n') && (input[*here+6]=='e') && (isblank(input[*here]))) {
-                    atom = make_object(SFS_SYMBOL); //Est-ce vraiment un symbol ? un string maybe ?
+                    atom = make_object(SFS_SYMBOL); /*Est-ce vraiment un symbol ? un string maybe ?*/
                     char str1[256] = {'\n'};
                     strcpy(atom->this.symbol,str1);
                 }
@@ -357,21 +373,22 @@ object sfs_read_atom( char *input, uint *here ) {
                     strcpy(atom->this.symbol,str1);
                
                 }
-                if((isalpha(input[*here]))&&(isblank(input[*here+1]))){ //1 lettre + 1 espace = caractere
+                if((isalpha(input[*here]))&&(isblank(input[*here+1]))){
                     atom = make_object(SFS_CHARACTER);
-                    atom->this.character = input[*here];                 }
+                    atom->this.character = input[*here];
+                }
         
             }
             if((input[*here] == 't')||(input[*here] == 'f')){
                 (*here)++;
                 if(isblank(input[*here] != 0)){
-                    atom = make_object(SFS_BOOLEAN); //True = 1 , False = 0
+                    atom = make_object(SFS_BOOLEAN); /*True = 1 , False = 0*/
                     atom->this.number.numtype = NUM_INTEGER;
                     atom->this.number.this.integer = (input[*here] == 't') ? 1 : 0;
                 }
             }
         }
-        if(isalpha(input[*here])){
+        if(isalpha(input[*here])){ /*boucle symbol*/
             caractere[i] = input[*here];
             (*here)++;
             i++;
@@ -399,15 +416,15 @@ object sfs_read_atom( char *input, uint *here ) {
         
 object sfs_read_pair( char *stream, uint *i ) {
     
-    uint * j = 0;
-    uint * k = 0;
+    uint *taille = 0;
+    uint *k = 0;
     object pair = make_object(SFS_PAIR);
     pair->this.pair.car = sfs_read(stream,i);
     
     while(stream[*i] != ')'){
-        (*j)++;
+        (*taille)++;
     }
-    while((*k)<(*j)){
+    while((*k)<(*taille)){
         if(isspace(stream[*k])){
             (*k)++;
         }
@@ -420,7 +437,5 @@ object sfs_read_pair( char *stream, uint *i ) {
     }
     return pair;
 }
-
-    
 
 
