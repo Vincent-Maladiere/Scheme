@@ -423,6 +423,4 @@ object sfs_read_pair( char *stream, uint *i ) {
 
     
 
-    return pair;
-}
-*/
+
