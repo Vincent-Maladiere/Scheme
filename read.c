@@ -288,7 +288,9 @@ uint  sfs_get_sexpr( char *input, FILE *fp ) {
 }
 
 object sfs_read( char *input, uint *here ) {
-    
+    while(isspace(input[*here])){
+        (*here)++;
+    }
     if ( input[*here] == '(' ) {
         if ( input[(*here)+1] == ')' ) {
             *here += 2;
@@ -308,28 +310,33 @@ object sfs_read( char *input, uint *here ) {
 object sfs_read_atom( char *input, uint *here ) {
     
     object atom = nil;
-    char caractere[256];
+    char caractere[256] = "";
     int i = 0;
-    while(isblank(input[*here])) { /*si le caractère est 1 espace on avance d'1 cran*/
-        (*here)++;
-    }
-
+    
     if((isdigit(input[*here]))||(input[*here] == '+')||(input[*here] == '-')){ /*boucle digit*/
         caractere[i] = input[*here];
         i++;
         (*here)++;
-        while(isdigit(input[*here])){ /*tant que des digits sont détectés, on les intègre dans le char*/
-            caractere[i] = input[*here];
-            i++;
-            (*here)++;
+        if((((input[*here-1]=='+')&&(isblank(input[*here])))||((input[*here-1])&&(isblank(input[*here]))))){
+            atom = make_object(SFS_SYMBOL);
+            strcpy(atom->this.symbol,caractere);
         }
-        if((isblank(input[*here]))||(input[*here]=='\0')) { /*si la fin du while est causée par un espace, c'est un nombre !*/
-            atom = make_object(SFS_NUMBER);
-            atom->this.number.numtype = NUM_INTEGER;
-            atom->this.number.this.integer = atoi(caractere);
-        }
+        
         else{
-            ERROR_MSG("Entier Invalide");
+            while(isdigit(input[*here])){ /*tant que des digits sont détectés, on les intègre dans le char*/
+                caractere[i] = input[*here];
+                i++;
+                (*here)++;
+            }
+            if((isblank(input[*here]))||(input[*here]==')')){ /*si la fin du while est causée par un espace, c'est un nombre !*/
+                atom = make_object(SFS_NUMBER);
+                atom->this.number.numtype = NUM_INTEGER;
+                atom->this.number.this.integer = atoi(caractere);
+            }
+            else{
+                ERROR_MSG("Entier Invalide\n");
+            }
+    
         }
     }
     if((input[*here]) == '"'){ /*boucle string*/
@@ -339,13 +346,14 @@ object sfs_read_atom( char *input, uint *here ) {
             i++;
             (*here)++;
         }
-        if(((input[*here] == '"')&&(isblank(input[*here+1])))||((input[*here] == '"')&&(input[*here+1]=='\0'))){
+        if(((input[*here] == '"')&&(isblank(input[(*here)+1])))||((input[*here] == '"')&&((input[*here]==')')))){
             atom = make_object(SFS_STRING);
             strcpy(atom->this.string,caractere);
             atom->this.string[i+1] = '\0'; /*toujours placé à la fin du string*/
+            (*here)++;
         }
         else{
-            ERROR_MSG("String Invalide");
+            ERROR_MSG("String Invalide\n");
         }
     }
     if(input[*here] == '#'){ /*boucle caractere*/
@@ -360,25 +368,24 @@ object sfs_read_atom( char *input, uint *here ) {
                 atom = make_object(SFS_SYMBOL);
                 char str1[256] = {' '};
                 strcpy(atom->this.symbol,str1);
-               
             }
-            else if((isalpha(input[*here]))&&((isblank(input[(*here)+1]))||(input[(*here)+1]=='\0'))){
+            else if((isalpha(input[*here]))&&((isblank(input[(*here)+1]))||(input[*here]==')'))){
                 atom = make_object(SFS_CHARACTER);
                 atom->this.character = input[*here];
             }
             else{
-                ERROR_MSG("Caractère invalide");
+                ERROR_MSG("Caractère invalide\n");
             }
         }
         if((input[*here] == 't')||(input[*here] == 'f')){
             (*here)++;
-            if(isblank(input[*here])||(input[*here])=='\0'){
+            if(isblank(input[*here])||(input[*here]==')')){
                 atom = make_object(SFS_BOOLEAN); /*True = 1 , False = 0*/
                 atom->this.number.numtype = NUM_INTEGER;
-                atom->this.number.this.integer = (input[*here] == 't') ? 1 : 0;
+                atom->this.number.this.integer = (input[*here-1] == 't') ? 1 : 0;
             }
             else{
-                ERROR_MSG("Booléen Invalide");
+                ERROR_MSG("Booléen Invalide\n");
             }
         }
     }
@@ -391,41 +398,32 @@ object sfs_read_atom( char *input, uint *here ) {
             (*here)++;
             i++;
         }
-        if(isblank(input[*here])||(input[*here]=='\0')){
+        if(isblank(input[*here])||(input[*here]==')')){
             atom = make_object(SFS_SYMBOL);
             strcpy(atom->this.symbol,caractere);
         }
         else{
-            ERROR_MSG("Symbol Invalide");
+            ERROR_MSG("Symbol Invalide\n");
         }
     }
-    else{
-        ERROR_MSG("Entrée Invalide");
-    }
-        
-    
+   
     return atom;
 }
         
         
+
         
         
-        
-object sfs_read_pair( char *stream, uint *i ) {
+object sfs_read_pair_save( char *stream, uint *i ) {
 
     object pair = make_object(SFS_PAIR);
     
-    while(isspace(stream[*i])){
-        (*i)++;
-    }
-    
     pair->this.pair.car = sfs_read(stream,i);
     
-    while(isspace(stream[*i])){
-        (*i)++;
-    }
     if(stream[*i] == ')'){
-    pair->this.pair.cdr = nil;
+        (*i)++;
+
+        pair->this.pair.cdr = sfs_read(stream,i);
     }
     else{
     pair->this.pair.cdr = sfs_read_pair(stream,i);
@@ -433,3 +431,33 @@ object sfs_read_pair( char *stream, uint *i ) {
     return pair;
 }
 
+object sfs_read_pair_old( char *stream, uint *i ) {
+    
+    object pair = make_object(SFS_PAIR);
+    
+    pair->this.pair.car = sfs_read(stream,i);
+    
+    if(stream[*i] == ')'){
+        (*i)++;
+        
+        pair->this.pair.cdr = nil;
+    }
+    else{
+        pair->this.pair.cdr = sfs_read(stream,i);
+    }
+    return pair;
+}
+
+object sfs_read_pair( char *stream, uint *i ) {
+    
+    if(stream[*i] == ')'){
+        (*i)++;
+        
+        return nil;
+    }
+    else {
+        object car = sfs_read(stream,i);
+        
+       return cons( car, sfs_read_pair(stream,i) );
+    }
+}
