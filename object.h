@@ -1,3 +1,10 @@
+//
+//  object.h
+//  Scheme
+//
+//  Created by Vincent Maladiere on 20/09/16.
+//  Copyright © 2016 Vincent Maladiere. All rights reserved.
+//
 
 /**
  * @file object.h
@@ -14,47 +21,47 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 #include "number.h"
-
-
-typedef struct object_t {
-
-    uint type;
-
-    union {
-
-        num              number;
-        char             character;
-        string           string;
-        string           symbol;
-
-        struct pair_t {
-            struct object_t *car;
-            struct object_t *cdr;
-        }                pair;
-
-        struct object_t *special;
-
-    } this;
-
-} *object;
-
-
-object make_object( uint type );
-object make_nil( void );
-
-#define SFS_NUMBER       0x00
-#define SFS_CHARACTER    0x01
-#define SFS_STRING       0x02
-#define SFS_PAIR         0x03
-#define SFS_NIL          0x04
-#define SFS_BOOLEAN      0x05
-#define SFS_SYMBOL       0x06
-
-
-extern object nil;
-
+    
+    
+    typedef struct object_t {
+        
+        uint type;
+        
+        union {
+            
+            num              number;
+            char             character;
+            string           string;
+            string           symbol;
+            
+            struct pair_t {
+                struct object_t *car;
+                struct object_t *cdr;
+            }                pair;
+            
+            struct object_t *special;
+            
+        } this;
+        
+    } *object;
+    
+    
+    object make_object( uint type );
+    object cons( object car, object cdr );
+    object make_nil( void );
+    
+#define SFS_NUMBER       0
+#define SFS_CHARACTER    1
+#define SFS_STRING       2
+#define SFS_PAIR         3
+#define SFS_NIL          4
+#define SFS_BOOLEAN      5
+#define SFS_SYMBOL       6
+    
+    
+    extern object nil;
 #ifdef __cplusplus
 }
 #endif
