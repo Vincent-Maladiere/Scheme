@@ -328,7 +328,7 @@ object sfs_read_atom( char *input, uint *here ) {
                 i++;
                 (*here)++;
             }
-            if((isblank(input[*here]))||(input[*here]==')')){ /*si la fin du while est causée par un espace, c'est un nombre !*/
+            if((isblank(input[*here]))||(input[*here] == ')')||(input[*here] == '\0')){ /*si la fin du while est causée par un espace, c'est un nombre !*/
                 atom = make_object(SFS_NUMBER);
                 atom->this.number.numtype = NUM_INTEGER;
                 atom->this.number.this.integer = atoi(caractere);
@@ -346,7 +346,7 @@ object sfs_read_atom( char *input, uint *here ) {
             i++;
             (*here)++;
         }
-        if(((input[*here] == '"')&&(isblank(input[(*here)+1])))||((input[*here] == '"')&&((input[*here]==')')))){
+        if((input[*here] == '"')&&((isblank(input[(*here)+1]))||(input[(*here)+1]==')')||(input[(*here)+1] == '\0'))){
             atom = make_object(SFS_STRING);
             strcpy(atom->this.string,caractere);
             atom->this.string[i+1] = '\0'; /*toujours placé à la fin du string*/
@@ -358,18 +358,23 @@ object sfs_read_atom( char *input, uint *here ) {
     }
     if(input[*here] == '#'){ /*boucle caractere*/
         (*here)++;
-        if(input[*here] == '\''){
-            if ((input[*here]=='n') && (input[*here+1]=='e') && (input[*here+2]=='w') && (input[*here+3]=='l') && (input[*here+4]=='i') && (input[*here+5]=='n') && (input[*here+6]=='e') && (isblank(input[*here]))) {
-                atom = make_object(SFS_SYMBOL); /*Est-ce vraiment un symbol ? un string maybe ?*/
+        if(input[*here] == '\\'){
+            (*here)++;
+            if ((input[*here]=='n') && (input[(*here)+1]=='e') && (input[(*here)+2]=='w') && (input[(*here)+3]=='l') && (input[(*here)+4]=='i') && (input[(*here)+5]=='n') && (input[(*here)+6]=='e') &&((isblank(input[(*here)+7]))||((input[(*here)+7] == ')'))||((input[*here+7] == '\0')))){
+                atom = make_object(SFS_SYMBOL);
                 char str1[256] = {'\n'};
                 strcpy(atom->this.symbol,str1);
+                (*here) += 7;
+                return atom;
             }
-            else if ((input[*here]=='s') && (input[*here+1]=='p') && (input[*here+2]=='a') && (input[*here+3]=='c') && (input[*here+4]=='e')&&(isblank(input[*here]))) {
+            if ((input[*here]=='s') && (input[(*here)+1]=='p') && (input[(*here)+2]=='a') && (input[(*here)+3]=='c') && (input[(*here)+4]=='e') && ((isblank(input[(*here)+5]))||((input[(*here)+5] == ')'))||((input[*here+5] == '\0')))){
                 atom = make_object(SFS_SYMBOL);
                 char str1[256] = {' '};
                 strcpy(atom->this.symbol,str1);
+                (*here) += 5;
+                return atom;
             }
-            else if((isalpha(input[*here]))&&((isblank(input[(*here)+1]))||(input[*here]==')'))){
+            if((isalpha(input[*here]))&&((isblank(input[(*here)+1]))||(input[(*here)+1]==')')||((input[(*here)+1] == '\0')))){
                 atom = make_object(SFS_CHARACTER);
                 atom->this.character = input[*here];
             }
@@ -379,7 +384,7 @@ object sfs_read_atom( char *input, uint *here ) {
         }
         if((input[*here] == 't')||(input[*here] == 'f')){
             (*here)++;
-            if(isblank(input[*here])||(input[*here]==')')){
+            if((isblank(input[*here]))||(input[*here]==')')||(input[*here] == '\0')){
                 atom = make_object(SFS_BOOLEAN); /*True = 1 , False = 0*/
                 atom->this.number.numtype = NUM_INTEGER;
                 atom->this.number.this.integer = (input[*here-1] == 't') ? 1 : 0;
@@ -398,7 +403,7 @@ object sfs_read_atom( char *input, uint *here ) {
             (*here)++;
             i++;
         }
-        if(isblank(input[*here])||(input[*here]==')')){
+        if((isblank(input[*here]))||(input[*here]==')')||(input[*here] == '\0')){
             atom = make_object(SFS_SYMBOL);
             strcpy(atom->this.symbol,caractere);
         }
