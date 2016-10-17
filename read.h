@@ -26,7 +26,8 @@ uint   sfs_get_sexpr( string input, FILE *fp );
 object sfs_read( char *input, uint *here );
 object sfs_read_atom( char *input, uint *here );
 object sfs_read_pair( char *stream, uint *i );
-
+int issymbol_partiel( char t);
+int issymbol_total( char t);
 
 #ifdef __cplusplus
 }
