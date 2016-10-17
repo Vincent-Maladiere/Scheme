@@ -1,10 +1,4 @@
-//
-//  print.c
-//  Scheme
-//
-//  Created by Vincent Maladiere on 05/10/16.
-//  Copyright © 2016 Vincent Maladiere. All rights reserved.
-//
+
 
 #include <stdio.h>
 /**
@@ -25,13 +19,20 @@ void sfs_print_atom( object o ) {
         printf("%d",o->this.number.this.integer); /* En supposant que les nombres soient tous entier*/
     }
     if(o->type == SFS_STRING){
-        printf("%s",o->this.string);
+        printf("\"%s\"",o->this.string);
     }
     if(o->type == SFS_CHARACTER){
-        printf("%c",o->this.character);
+        printf("#\\%c",o->this.character); /* ?? */
     }
     if(o->type == SFS_SYMBOL){
-        printf("%s",o->this.symbol);
+        char str1[256] = {'n','e','w','l','i','n','e'};
+        char str2[256] = {'s','p','a','c','e'};
+        if((strcmp(o->this.symbol,str1) == 0)||(strcmp(o->this.symbol,str2) == 0)){
+            printf("#\\%s",o->this.symbol);
+        }
+        else{
+            printf("%s",o->this.symbol);
+        }
     }
     if(o->type == SFS_BOOLEAN){
         (o->this.number.this.integer == 0) ? printf("#f") : printf("#t");
@@ -40,14 +41,14 @@ void sfs_print_atom( object o ) {
     return;
 }
 
-void sfs_print_pair_save( object o ) {
+/*void sfs_print_pair_save( object o ) {
     if(o->this.pair.car->type == SFS_PAIR){
         printf("(");
         sfs_print(o->this.pair.car);
     }
     else{
         sfs_print(o->this.pair.car);
-        if(o->this.pair.cdr != nil){ /*si ce n'est pas le dernière atome, espace entre les atomes*/
+        if(o->this.pair.cdr != nil){ 
             printf(" ");
         }
         if(o->this.pair.cdr == nil){
@@ -74,7 +75,7 @@ void sfs_print_pair_save_old( object o ) {
     else WARNING_MSG("On ne devrait pas etre la");
     return;
 }
-
+*/
 
 void sfs_print_pair( object o ) {
 
@@ -84,7 +85,9 @@ void sfs_print_pair( object o ) {
         sfs_print(o->this.pair.car);
         o = o->this.pair.cdr;
         if(o != nil){
+            
             printf(" ");
+            
         }
     }
     printf(")");
@@ -93,6 +96,9 @@ void sfs_print_pair( object o ) {
 
 
 void sfs_print( object o ) {
+    /*if(o->type == SFS_NIL) {
+        printf("()");
+    }*/                                         /* pb dans l'affichage pair*/
     if ( SFS_PAIR == o->type ) {
         sfs_print_pair( o );
     }
