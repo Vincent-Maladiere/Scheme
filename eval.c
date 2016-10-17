@@ -39,7 +39,7 @@ object sfs_eval( object expr ) {
 
  int is_form (char *name, object expr) { /* detecter si c'est une forme oui==1, 0 sinon */
     if ((expr->type == SFS_PAIR) && (expr->this.pair.car->type == SFS_SYMBOL) && (0 == strcmp(name, expr->this.pair.car->this.string))){
-        return 1;
+        return 1;  /* strcmp renvoi 0 si les 2 chaines de caractères sont égales (entre les cas en bleu et celle taper, le sting du symbol */
     }
     else{
         return 0;
