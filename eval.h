@@ -1,4 +1,5 @@
 
+
 /**
  * @file eval.h
  * @author François Cayre <cayre@yiking.(null)>
@@ -14,12 +15,24 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
+  
+            
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+    
+    
 #include "object.h"
+#include "read.h"
+#include "eval.h"
+#include "print.h"
 
-object sfs_eval( object );
-
+    
+    object sfs_eval( object );
+    int is_form (char *name, object expr);
+    void change_env ();
+    void back_to_head_env ();
+    
 #ifdef __cplusplus
 }
 #endif
