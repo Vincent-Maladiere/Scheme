@@ -1,10 +1,4 @@
-//
-//  object.h
-//  Scheme
-//
-//  Created by Vincent Maladiere on 20/09/16.
-//  Copyright © 2016 Vincent Maladiere. All rights reserved.
-//
+
 
 /**
  * @file object.h
@@ -51,6 +45,8 @@ extern "C" {
     object make_object( uint type );
     object cons( object car, object cdr );
     object make_nil( void );
+    object car( object sexpr );
+    object cdr( object sexpr );
     
 #define SFS_NUMBER       0
 #define SFS_CHARACTER    1
@@ -60,8 +56,8 @@ extern "C" {
 #define SFS_BOOLEAN      5
 #define SFS_SYMBOL       6
     
-    
     extern object nil;
+    extern object env; /* environnement */
 #ifdef __cplusplus
 }
 #endif
