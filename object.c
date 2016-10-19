@@ -1,11 +1,4 @@
 
-//
-//  object.c
-//  Scheme
-//
-//  Created by Vincent Maladiere on 20/09/16.
-//  Copyright © 2016 Vincent Maladiere. All rights reserved.
-//
 
 /**
  * @file object.c
@@ -46,4 +39,10 @@ object make_nil( void ) {
     return t;
 }
 
+object car( object sexpr ){
+    return sexpr->this.pair.car;
+}
 
+object cdr( object sexpr ){
+    return sexpr->this.pair.cdr;
+}
