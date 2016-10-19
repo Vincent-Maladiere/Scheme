@@ -38,6 +38,12 @@ void init_interpreter ( void ) {
     
 }
 
+object env;
+
+void init_env (void) {
+    env = make_object(SFS_PAIR);
+}
+
 int main ( int argc, char *argv[] ) {
     
     char     input[BIGSTRING];
