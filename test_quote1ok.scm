@@ -1,5 +1,5 @@
 ; TEST_RETURN_CODE=PASS
-; TEST_COMMENT=Test_define_numero 1
+; TEST_COMMENT=
 
 
 (quote a)
