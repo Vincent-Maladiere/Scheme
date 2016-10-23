@@ -30,8 +30,8 @@ object sfs_eval( object expr ) {
     if(expr->type == SFS_SYMBOL){
         object cherchemaggle = make_object(SFS_PAIR);
         cherchemaggle = env->this.pair.car;
-        while(strcmp(cherchemaggle->this.pair.car->this.symbol, expr->this.symbol) != 1){ /* PB MAGGLE */
-            if(env == nil){
+        while(strcmp(cherchemaggle->this.pair.car->this.pair.car->this.symbol, expr->this.symbol) != 0){ /* PB MAGGLE */
+            if(cherchemaggle == nil){
                 ERROR_MSG("Undefined parameter");
             }
             cherchemaggle = cherchemaggle->this.pair.cdr;
@@ -72,7 +72,7 @@ object sfs_eval( object expr ) {
             object safe_env = make_object(SFS_PAIR);
             safe_env->this.pair.car = cons(expr->this.pair.cdr->this.pair.car, expr->this.pair.cdr->this.pair.cdr->this.pair.car);
             safe_env->this.pair.cdr = env->this.pair.car;
-            env = safe_env;
+            env->this.pair.car = safe_env;
             expr = expr->this.pair.cdr->this.pair.car; /* Permet d'afficher la variable définie avec sfs_print */
         }
         else{
@@ -82,14 +82,35 @@ object sfs_eval( object expr ) {
     if(is_form("set!", expr) == 1){
         object safe_env = make_object(SFS_PAIR);
         safe_env = env->this.pair.car; /* On ne perd pas la tête de liste ! On envoit une copie */
-        while(is_form(safe_env->this.pair.car->this.pair.car->this.string, expr->this.pair.cdr->this.pair.car) != 1){
-            if(env == nil){
+        while(strcmp(safe_env->this.pair.car->this.pair.car->this.symbol, expr->this.pair.cdr->this.pair.car->this.symbol) != 0){
+            if(safe_env == nil){
                 ERROR_MSG("You can't set an undefined parameter");
             }
             safe_env = safe_env->this.pair.cdr;
         }
-        object new_pair = cons(expr->this.pair.cdr->this.pair.car,expr->this.pair.cdr->this.pair.cdr->this.pair.car);
-        safe_env->this.pair.car = new_pair;
+        safe_env->this.pair.car->this.pair.cdr->type = expr->this.pair.cdr->this.pair.cdr->this.pair.car->type;
+        
+        if(SFS_NUMBER == safe_env->this.pair.car->this.pair.cdr->type){
+            safe_env->this.pair.car->this.pair.cdr->this.number.this.integer = expr->this.pair.cdr->this.pair.cdr->this.pair.car->this.number.this.integer;
+            expr = expr->this.pair.cdr->this.pair.car;
+            return expr;
+        }
+        if(SFS_STRING == safe_env->this.pair.car->this.pair.cdr->type){
+            strcpy(safe_env->this.pair.car->this.pair.cdr->this.string, expr->this.pair.cdr->this.pair.cdr->this.pair.car->this.string);
+            expr = expr->this.pair.cdr->this.pair.car;
+            return expr;
+        }
+        if(SFS_CHARACTER == safe_env->this.pair.car->this.pair.cdr->type){
+            safe_env->this.pair.car->this.pair.cdr->this.character = expr->this.pair.cdr->this.pair.cdr->this.character;
+            expr = expr->this.pair.cdr->this.pair.car;
+            return expr;
+        }
+        if(SFS_BOOLEAN == safe_env->this.pair.car->this.pair.cdr->type){
+            safe_env->this.pair.car->this.pair.cdr->this.number.this.integer = expr->this.pair.cdr->this.pair.cdr->this.pair.car->this.number.this.integer;
+            expr = expr->this.pair.cdr->this.pair.car;
+            return expr;
+        }
+
     }
     if(is_form("or", expr) == 1){
         
@@ -110,18 +131,4 @@ object sfs_eval( object expr ) {
     else{
         return 0;
     }
-}
-
-
-
-
-
-
-
-void change_env (){
-    env = cdr(env);
-}
-
-void back_to_head_env (object saved_env){
-    env = saved_env ;
 }
