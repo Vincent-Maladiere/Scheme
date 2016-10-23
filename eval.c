@@ -20,19 +20,24 @@
 #include "print.h"
 
 object sfs_eval( object expr ) {
+   
+    char str3[256] = {'+','i','n','f'};
+    char str4[256] = {'-','i','n','f'};
     
-   uint *ici = 0;
-   restart :
+    restart :
     
-    if((expr->type==SFS_NUMBER || expr->type==SFS_STRING || expr->type==SFS_BOOLEAN  || expr->type==SFS_CHARACTER)){ /* SFS_PAIR aussi ??????? */
+    if((expr->type==SFS_NUMBER || expr->type==SFS_STRING || expr->type==SFS_BOOLEAN  || expr->type==SFS_CHARACTER || (strcmp(expr->this.symbol,str3) == 0) || (strcmp(expr->this.symbol,str4) == 0))){ /* SFS_PAIR aussi ??????? */
         return expr;  /* pas d'eval donc autoevaluant */
     }
     if(expr->type == SFS_SYMBOL){
         object cherchemaggle = make_object(SFS_PAIR);
         cherchemaggle = env->this.pair.car;
+        if(cherchemaggle == NULL){
+            ERROR_MSG("\n Undefined parameter\n");
+        }
         while(strcmp(cherchemaggle->this.pair.car->this.pair.car->this.symbol, expr->this.symbol) != 0){ /* PB MAGGLE */
-            if(cherchemaggle == nil){
-                ERROR_MSG("Undefined parameter");
+            if(cherchemaggle == NULL){
+                ERROR_MSG("\n Undefined parameter\n");
             }
             cherchemaggle = cherchemaggle->this.pair.cdr;
         }
@@ -70,23 +75,26 @@ object sfs_eval( object expr ) {
     if(is_form("define", expr) == 1){
         if(expr->this.pair.cdr->this.pair.car->type == SFS_SYMBOL){
             object safe_env = make_object(SFS_PAIR);
-            safe_env->this.pair.car = cons(expr->this.pair.cdr->this.pair.car, expr->this.pair.cdr->this.pair.cdr->this.pair.car);
+            safe_env->this.pair.car = cons(expr->this.pair.cdr->this.pair.car, sfs_eval(expr->this.pair.cdr->this.pair.cdr->this.pair.car));
             safe_env->this.pair.cdr = env->this.pair.car;
             env->this.pair.car = safe_env;
             expr = expr->this.pair.cdr->this.pair.car; /* Permet d'afficher la variable définie avec sfs_print */
         }
         else{
-            ERROR_MSG("Define impossible");
+            ERROR_MSG("\n Define impossible\n");
         }
     }
     if(is_form("set!", expr) == 1){
         object safe_env = make_object(SFS_PAIR);
         safe_env = env->this.pair.car; /* On ne perd pas la tête de liste ! On envoit une copie */
+        if(safe_env == NULL){
+            ERROR_MSG("\n You can't set an undefined parameter\n");
+        }
         while(strcmp(safe_env->this.pair.car->this.pair.car->this.symbol, expr->this.pair.cdr->this.pair.car->this.symbol) != 0){
-            if(safe_env == nil){
-                ERROR_MSG("You can't set an undefined parameter");
-            }
             safe_env = safe_env->this.pair.cdr;
+            if(safe_env == NULL){
+                ERROR_MSG("\n You can't set an undefined parameter\n");
+            }
         }
         safe_env->this.pair.car->this.pair.cdr->type = expr->this.pair.cdr->this.pair.cdr->this.pair.car->type;
         
@@ -110,7 +118,11 @@ object sfs_eval( object expr ) {
             expr = expr->this.pair.cdr->this.pair.car;
             return expr;
         }
+        if(SFS_PAIR == safe_env->this.pair.car->this.pair.cdr->type){
+            expr->this.pair.cdr->this.pair.cdr->this.pair.car = sfs_eval(expr->this.pair.cdr->this.pair.cdr->this.pair.car);
+            goto restart;
 
+        }
     }
     if(is_form("or", expr) == 1){
         
