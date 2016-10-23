@@ -125,9 +125,16 @@ object sfs_eval( object expr ) {
         }
     }
     if(is_form("or", expr) == 1){
-        
+        if((sfs_eval(cdr(car(expr)))==TRUE) || sfs_eval(cdr(cdr(car(expr))))==TRUE) {
+           return TRUE; }
+       else {
+          return FALSE;}
     }
     if(is_form("and", expr) == 1){
+       if((sfs_eval(cdr(car(expr)))==TRUE) && sfs_eval(cdr(cdr(car(expr))))==TRUE) {
+          return TRUE; }
+       else {
+          return FALSE;}
         
     }
 
