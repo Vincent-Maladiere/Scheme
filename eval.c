@@ -20,7 +20,8 @@
 #include "print.h"
 
 object sfs_eval( object expr ) {
-   
+    char str1[256] = {'n','e','w','l','i','n','e'};
+    char str2[256] = {'s','p','a','c','e'};
     char str3[256] = {'+','i','n','f'};
     char str4[256] = {'-','i','n','f'};
     
@@ -36,10 +37,11 @@ object sfs_eval( object expr ) {
             ERROR_MSG("\n Undefined parameter\n");
         }
         while(strcmp(cherchemaggle->this.pair.car->this.pair.car->this.symbol, expr->this.symbol) != 0){ /* PB MAGGLE */
+            cherchemaggle = cherchemaggle->this.pair.cdr;
             if(cherchemaggle == NULL){
                 ERROR_MSG("\n Undefined parameter\n");
             }
-            cherchemaggle = cherchemaggle->this.pair.cdr;
+
         }
         object result = make_object(cherchemaggle->this.pair.car->this.pair.cdr->type);
         if(SFS_NUMBER == cherchemaggle->this.pair.car->this.pair.cdr->type){
@@ -51,11 +53,17 @@ object sfs_eval( object expr ) {
             return result;
         }
         if(SFS_CHARACTER == cherchemaggle->this.pair.car->this.pair.cdr->type){
-            result->this.character = cherchemaggle->this.character;
+            
+            if((strcmp(cherchemaggle->this.pair.car->this.pair.cdr->this.symbol,str1))||(strcmp(cherchemaggle->this.pair.car->this.pair.cdr->this.symbol,str2))){
+                strcpy(result->this.symbol,cherchemaggle->this.pair.car->this.pair.cdr->this.symbol);
+            }
+            else{
+                result->this.character = cherchemaggle->this.pair.car->this.pair.cdr->this.character;
+            }
             return result;
         }
         if(SFS_BOOLEAN == cherchemaggle->this.pair.car->this.pair.cdr->type){
-            result->this.number.this.integer = cherchemaggle->this.number.this.integer;
+            result->this.number.this.integer = cherchemaggle->this.pair.car->this.pair.cdr->this.number.this.integer;
             return result;
         }
     }
@@ -63,12 +71,12 @@ object sfs_eval( object expr ) {
         return expr->this.pair.cdr->this.pair.car;
     }
     if(is_form("if",expr) == 1) {
-        if(sfs_eval(cdr(car(expr))) == TRUE){
-            expr = cdr(cdr(car(expr)));
+        if(sfs_eval(expr->this.pair.cdr->this.pair.car)->this.number.this.integer == 1){
+            expr = expr->this.pair.cdr->this.pair.cdr->this.pair.car;
             goto restart;
         }
         else{
-            expr = cdr(cdr(cdr(car(expr))));
+            expr = expr->this.pair.cdr->this.pair.cdr->this.pair.cdr->this.pair.car;
             goto restart;
         }
     }
@@ -96,48 +104,40 @@ object sfs_eval( object expr ) {
                 ERROR_MSG("\n You can't set an undefined parameter\n");
             }
         }
-        safe_env->this.pair.car->this.pair.cdr->type = expr->this.pair.cdr->this.pair.cdr->this.pair.car->type;
-        
-        if(SFS_NUMBER == safe_env->this.pair.car->this.pair.cdr->type){
-            safe_env->this.pair.car->this.pair.cdr->this.number.this.integer = expr->this.pair.cdr->this.pair.cdr->this.pair.car->this.number.this.integer;
-            expr = expr->this.pair.cdr->this.pair.car;
-            return expr;
-        }
-        if(SFS_STRING == safe_env->this.pair.car->this.pair.cdr->type){
-            strcpy(safe_env->this.pair.car->this.pair.cdr->this.string, expr->this.pair.cdr->this.pair.cdr->this.pair.car->this.string);
-            expr = expr->this.pair.cdr->this.pair.car;
-            return expr;
-        }
-        if(SFS_CHARACTER == safe_env->this.pair.car->this.pair.cdr->type){
-            safe_env->this.pair.car->this.pair.cdr->this.character = expr->this.pair.cdr->this.pair.cdr->this.character;
-            expr = expr->this.pair.cdr->this.pair.car;
-            return expr;
-        }
-        if(SFS_BOOLEAN == safe_env->this.pair.car->this.pair.cdr->type){
-            safe_env->this.pair.car->this.pair.cdr->this.number.this.integer = expr->this.pair.cdr->this.pair.cdr->this.pair.car->this.number.this.integer;
-            expr = expr->this.pair.cdr->this.pair.car;
-            return expr;
-        }
-        if(SFS_PAIR == safe_env->this.pair.car->this.pair.cdr->type){
-            expr->this.pair.cdr->this.pair.cdr->this.pair.car = sfs_eval(expr->this.pair.cdr->this.pair.cdr->this.pair.car);
-            goto restart;
 
-        }
+        safe_env->this.pair.car->this.pair.cdr = sfs_eval(expr->this.pair.cdr->this.pair.cdr->this.pair.car);
+        expr = expr->this.pair.cdr->this.pair.car;
+        return expr;
     }
+    
     if(is_form("or", expr) == 1){
-        if((sfs_eval(cdr(car(expr)))==TRUE) || sfs_eval(cdr(cdr(car(expr))))==TRUE) {
-           return TRUE; }
-       else {
-          return FALSE;}
+        if((sfs_eval(expr->this.pair.cdr->this.pair.car)->this.number.this.integer == 0)&&(sfs_eval(expr->this.pair.cdr->this.pair.car)->this.string[0] == '\x01')){
+            if((sfs_eval(expr->this.pair.cdr->this.pair.cdr->this.pair.car)->this.number.this.integer == 0) && (sfs_eval(expr->this.pair.cdr->this.pair.cdr->this.pair.car)->this.string[0] == '\x01')) {
+                expr->type = SFS_BOOLEAN;
+                expr->this.number.this.integer = 0;
+            }
+            else{
+                expr = expr->this.pair.cdr->this.pair.cdr->this.pair.car;
+                goto restart;
+            }
+        }
+        else{
+            expr = expr->this.pair.cdr->this.pair.car;
+            goto restart;
+        }
     }
+    
     if(is_form("and", expr) == 1){
-       if((sfs_eval(cdr(car(expr)))==TRUE) && sfs_eval(cdr(cdr(car(expr))))==TRUE) {
-          return TRUE; }
-       else {
-          return FALSE;}
-        
+        if(((sfs_eval(expr->this.pair.cdr->this.pair.car)->this.number.this.integer == 0) &&(sfs_eval(expr->this.pair.cdr->this.pair.car)->this.string[0] == '\x01')) || ((sfs_eval(expr->this.pair.cdr->this.pair.cdr->this.pair.car)->this.number.this.integer == 0) && (sfs_eval(expr->this.pair.cdr->this.pair.cdr->this.pair.car)->this.string[0] == '\x01'))) {
+            expr->type = SFS_BOOLEAN;
+            expr->this.number.this.integer = 0;
+        }
+        else {
+            expr = expr->this.pair.cdr->this.pair.cdr->this.pair.car;
+            goto restart;
+        }
     }
-
+    
     return expr;
 }
 
