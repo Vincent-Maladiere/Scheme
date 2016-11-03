@@ -37,6 +37,10 @@ extern "C" {
             
             struct object_t *special;
             
+            struct { 
+                struct object_t * (*function)(struct object_t *);
+            } primitive;
+            
         } this;
         
     } *object;
