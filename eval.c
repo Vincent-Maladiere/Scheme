@@ -151,3 +151,10 @@ object sfs_eval( object expr ) {
         return 0;
     }
 }
+
+
+else if (isform('+'))
+    object(*plus)(object)
+    exec(plus, eval(args))
+
+
