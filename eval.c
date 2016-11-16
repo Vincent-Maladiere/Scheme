@@ -153,7 +153,7 @@ object sfs_eval( object expr ) {
 }
 
 
-else if (isform('+'))
+else if (isform("+", expr))
     object(*plus)(object)
     exec(plus, eval(args))
 
