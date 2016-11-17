@@ -1,160 +1,79 @@
+#include "primitive.h"
 
-
-/**
- * @file eval.c
- * @author François Cayre <cayre@yiking.(null)>
- * @date Fri Jun 22 20:11:30 2012
- * @brief Evaluation stuff for SFS.
- *
- * Evaluation stuff for SFS.
- */
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
-
-#include "object.h"
-#include "read.h"
-#include "eval.h"
-#include "print.h"
-
-object sfs_eval( object expr ) {
-    char str1[256] = {'n','e','w','l','i','n','e'};
-    char str2[256] = {'s','p','a','c','e'};
-    char str3[256] = {'+','i','n','f'};
-    char str4[256] = {'-','i','n','f'};
+object make_primitive(void){
+    list_prim = make_object(SFS_PAIR);
+    list_prim->this.pair.car = NULL;
+    list_prim->this.pair.cdr = make_object(SFS_PAIR);
     
-    restart :
+    object o = make_object(SFS_PAIR);
+    o = list_prim->this.pair.cdr;
     
-    if((expr->type==SFS_NUMBER || expr->type==SFS_STRING || expr->type==SFS_BOOLEAN  || expr->type==SFS_CHARACTER || (strcmp(expr->this.symbol,str3) == 0) || (strcmp(expr->this.symbol,str4) == 0))){ /* SFS_PAIR aussi ??????? */
-        return expr;  /* pas d'eval donc autoevaluant */
-    }
-    if(expr->type == SFS_SYMBOL){
-        object cherchemaggle = make_object(SFS_PAIR);
-        cherchemaggle = env->this.pair.car;
-        if(cherchemaggle == NULL){
-            ERROR_MSG("\n Undefined parameter\n");
-        }
-        while(strcmp(cherchemaggle->this.pair.car->this.pair.car->this.symbol, expr->this.symbol) != 0){ /* PB MAGGLE */
-            cherchemaggle = cherchemaggle->this.pair.cdr;
-            if(cherchemaggle == NULL){
-                ERROR_MSG("\n Undefined parameter\n");
-            }
+    /* arithmétique */
+    
+    /* + */
+    
+    o->this.pair.car = make_object(SFS_PAIR);
+    o->this.pair.car->this.pair.car = make_object(SFS_SYMBOL);
+    char str5[256] = {'+'};
+    strcpy(o->this.pair.car->this.pair.car->this.symbol,str5);
+    
+    o->this.pair.car->this.pair.cdr = make_object(SFS_PRIMITIVE);
+    o->this.pair.car->this.pair.cdr->this.primitive.fonction = plus_p;
+    
+    o->this.pair.cdr = make_object(SFS_PAIR);
+    o = o->this.pair.cdr;
+    
+    /* - */
+    
+    o->this.pair.car = make_object(SFS_PAIR);
+    o->this.pair.car->this.pair.car = make_object(SFS_SYMBOL);
+    char str6[256] = {'-'};
+    strcpy(o->this.pair.car->this.pair.car->this.symbol,str6);
+    
+    o->this.pair.car->this.pair.cdr = make_object(SFS_PRIMITIVE);
+    o->this.pair.car->this.pair.cdr->this.primitive.fonction = moins_p;
+    
+    o->this.pair.cdr = make_object(SFS_PAIR);
+    o = o->this.pair.cdr;
 
-        }
-        object result = make_object(cherchemaggle->this.pair.car->this.pair.cdr->type);
-        if(SFS_NUMBER == cherchemaggle->this.pair.car->this.pair.cdr->type){
-            result->this.number.this.integer = cherchemaggle->this.pair.car->this.pair.cdr->this.number.this.integer;
-            return result;
-        }
-        if(SFS_STRING == cherchemaggle->this.pair.car->this.pair.cdr->type){
-            strcpy(result->this.string, cherchemaggle->this.pair.car->this.pair.cdr->this.string);
-            return result;
-        }
-        if(SFS_CHARACTER == cherchemaggle->this.pair.car->this.pair.cdr->type){
-            
-            if((strcmp(cherchemaggle->this.pair.car->this.pair.cdr->this.symbol,str1))||(strcmp(cherchemaggle->this.pair.car->this.pair.cdr->this.symbol,str2))){
-                strcpy(result->this.symbol,cherchemaggle->this.pair.car->this.pair.cdr->this.symbol);
-            }
-            else{
-                result->this.character = cherchemaggle->this.pair.car->this.pair.cdr->this.character;
-            }
-            return result;
-        }
-        if(SFS_BOOLEAN == cherchemaggle->this.pair.car->this.pair.cdr->type){
-            result->this.number.this.integer = cherchemaggle->this.pair.car->this.pair.cdr->this.number.this.integer;
-            return result;
-        }
-    }
-    if(is_form("quote",expr) == 1) {
-        return expr->this.pair.cdr->this.pair.car;
-    }
-    if(is_form("if",expr) == 1) {
-        if(sfs_eval(expr->this.pair.cdr->this.pair.car)->this.number.this.integer == 1){
-            expr = expr->this.pair.cdr->this.pair.cdr->this.pair.car;
-            goto restart;
-        }
-        else{
-            expr = expr->this.pair.cdr->this.pair.cdr->this.pair.cdr->this.pair.car;
-            goto restart;
-        }
-    }
-    if(is_form("define", expr) == 1){
-        if(expr->this.pair.cdr->this.pair.car->type == SFS_SYMBOL){
-            object safe_env = make_object(SFS_PAIR);
-            safe_env->this.pair.car = cons(expr->this.pair.cdr->this.pair.car, sfs_eval(expr->this.pair.cdr->this.pair.cdr->this.pair.car));
-            safe_env->this.pair.cdr = env->this.pair.car;
-            env->this.pair.car = safe_env;
-            expr = expr->this.pair.cdr->this.pair.car; /* Permet d'afficher la variable définie avec sfs_print */
-        }
-        else{
-            ERROR_MSG("\n Define impossible\n");
-        }
-    }
-    if(is_form("set!", expr) == 1){
-        object safe_env = make_object(SFS_PAIR);
-        safe_env = env->this.pair.car; /* On ne perd pas la tête de liste ! On envoit une copie */
-        if(safe_env == NULL){
-            ERROR_MSG("\n You can't set an undefined parameter\n");
-        }
-        while(strcmp(safe_env->this.pair.car->this.pair.car->this.symbol, expr->this.pair.cdr->this.pair.car->this.symbol) != 0){
-            safe_env = safe_env->this.pair.cdr;
-            if(safe_env == NULL){
-                ERROR_MSG("\n You can't set an undefined parameter\n");
-            }
-        }
+    
+    
 
-        safe_env->this.pair.car->this.pair.cdr = sfs_eval(expr->this.pair.cdr->this.pair.cdr->this.pair.car);
-        expr = expr->this.pair.cdr->this.pair.car;
-        return expr;
-    }
     
-    if(is_form("or", expr) == 1){
-        if((sfs_eval(expr->this.pair.cdr->this.pair.car)->this.number.this.integer == 0)&&(sfs_eval(expr->this.pair.cdr->this.pair.car)->this.string[0] == '\x01')){
-            if((sfs_eval(expr->this.pair.cdr->this.pair.cdr->this.pair.car)->this.number.this.integer == 0) && (sfs_eval(expr->this.pair.cdr->this.pair.cdr->this.pair.car)->this.string[0] == '\x01')) {
-                expr->type = SFS_BOOLEAN;
-                expr->this.number.this.integer = 0;
-            }
-            else{
-                expr = expr->this.pair.cdr->this.pair.cdr->this.pair.car;
-                goto restart;
-            }
-        }
-        else{
-            expr = expr->this.pair.cdr->this.pair.car;
-            goto restart;
-        }
-    }
-    
-    if(is_form("and", expr) == 1){
-        if(((sfs_eval(expr->this.pair.cdr->this.pair.car)->this.number.this.integer == 0) &&(sfs_eval(expr->this.pair.cdr->this.pair.car)->this.string[0] == '\x01')) || ((sfs_eval(expr->this.pair.cdr->this.pair.cdr->this.pair.car)->this.number.this.integer == 0) && (sfs_eval(expr->this.pair.cdr->this.pair.cdr->this.pair.car)->this.string[0] == '\x01'))) {
-            expr->type = SFS_BOOLEAN;
-            expr->this.number.this.integer = 0;
-        }
-        else {
-            expr = expr->this.pair.cdr->this.pair.cdr->this.pair.car;
-            goto restart;
-        }
-    }
-    
-    return expr;
+    return list_prim;
 }
 
 
 
- int is_form (char *name, object expr) {  /* detecter si c'est une forme oui==1, 0 sinon */
-     if ((expr->type == SFS_PAIR) && (expr->this.pair.car->type == SFS_SYMBOL) && (0 == strcmp(name, expr->this.pair.car->this.string))){
-        return 1;
+object plus_p (object arbreAAditionner){
+    int res = 0;
+    while(arbreAAditionner->this.pair.car != NULL){
+        if(arbreAAditionner->this.pair.car->type == SFS_NUMBER){
+            res += arbreAAditionner->this.pair.car->this.number.this.integer;
+        }
+        else{
+            ERROR_MSG("\n Il y a un non entier dans l'arbre argument");
+        }
+        arbreAAditionner = arbreAAditionner->this.pair.cdr;
     }
-    else{
-        return 0;
-    }
+    object resObject = make_object(SFS_NUMBER);
+    resObject->this.number.this.integer = res;
+    return resObject;
 }
 
-
-else if (isform("+", expr))
-    object(*plus)(object)
-    exec(plus, eval(args))
-
-
+object moins_p (object arbreASoustraire){
+    int res = arbreASoustraire->this.pair.car->this.number.this.integer;
+    arbreASoustraire = arbreASoustraire->this.pair.cdr;
+    while(arbreASoustraire->this.pair.car != NULL){
+        if(arbreASoustraire->this.pair.car->type == SFS_NUMBER){
+            res -= arbreASoustraire->this.pair.car->this.number.this.integer;
+        }
+        else{
+            ERROR_MSG("\n Il y a un non entier dans l'arbre argument");
+        }
+        arbreASoustraire = arbreASoustraire->this.pair.cdr;
+    }
+    object resObject = make_object(SFS_NUMBER);
+    resObject->this.number.this.integer = res;
+    return resObject;
+}
