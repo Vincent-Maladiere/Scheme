@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 
-
+#include "primitive.h"
 #include "object.h"
 #include "read.h"
 #include "eval.h"
@@ -31,18 +31,16 @@ void usage_error( char *command ) {
 
 
 object nil;
+object env;
+object list_prim;
 
 void init_interpreter ( void ) {
     
     nil      = make_nil();
-    
-}
-
-object env;
-
-void init_env (void) {
     env = make_object(SFS_PAIR);
+    list_prim = make_primitive();
 }
+
 
 int main ( int argc, char *argv[] ) {
     
