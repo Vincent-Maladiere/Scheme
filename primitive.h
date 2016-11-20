@@ -40,8 +40,8 @@ object pair_p (object arbreATester);
 object null_p (object arbreATester);
 
 /* Convertit un seul parametre, erreur si plusieurs arguments */
-object char_integer_p (object argAConvertir);
-object integer_char_p (object argAConvertir);
+object char_number_p (object argAConvertir);
+object number_char_p (object argAConvertir);
 object number_string_p (object argAConvertir);
 object string_number_p (object argAConvertir);
 object symbol_string_p (object argAConvertir);
