@@ -324,9 +324,23 @@ object sfs_read_atom( char *input, uint *here ) {
     
     object atom = nil;
     char caractere[256] = "";
+    char str002[256] = {'-','i','n','f'};
+    char str003[256] = {'+','i','n','f'};
     int i = 0;
 
     if((isdigit(input[*here]))||(input[*here] == '+')||(input[*here] == '-')){ /*boucle digit*/
+        if((input[*here+1] == 'i') && (input[*here+2] == 'n') && (input[*here+3] == 'f')){
+            atom = make_object(SFS_INFINI);
+            if(input[*here] == '+'){
+                strcpy(atom->this.symbol,str003);
+            }
+            if(input[*here] == '-'){
+                strcpy(atom->this.symbol,str002);
+            }
+            *here += 4;
+            return atom;
+        }
+        
         int taille = 0;
         if(isdigit(input[*here])){
             taille = 1; /* 10 digits max, on commence à 1 ici*/
@@ -347,15 +361,13 @@ object sfs_read_atom( char *input, uint *here ) {
                 taille += 1;
                 if(taille > 10){
                     if(caractere[0] == '-'){
-                        char str2[256] = {'-','i','n','f'};
-                        atom = make_object(SFS_SYMBOL);
-                        strcpy(atom->this.symbol, str2);
+                        atom = make_object(SFS_INFINI);
+                        strcpy(atom->this.symbol, str002);
                         return atom;
                     }
                     else{
-                        char str2[256] = {'+','i','n','f'};
-                        atom = make_object(SFS_SYMBOL);
-                        strcpy(atom->this.symbol, str2);
+                        atom = make_object(SFS_INFINI);
+                        strcpy(atom->this.symbol, str003);
                         return atom;
                     }
                 }
@@ -512,7 +524,7 @@ object sfs_read_pair( char *stream, uint *i ) {
 }
 
 int issymbol_partiel( char t){
-    if((t == '/')||(t == '\\')||(t == '&')||(t == '=')||(t == '%')||(t == '*')||(t == '$')||(t == '!')||(t == '?')||(t == '.')||(t == ',')||(t == ';')||(t == ':')||(t == '_')||(t == '@')||(t == '^')){
+    if((t == '/')||(t == '\\')||(t == '&')||(t == '-')||(t == '=')||(t == '<')||(t == '>')||(t == '%')||(t == '*')||(t == '$')||(t == '!')||(t == '?')||(t == '.')||(t == ',')||(t == ';')||(t == ':')||(t == '_')||(t == '@')||(t == '^')){
         return 1;
     }
     else{ return 0;
@@ -520,7 +532,7 @@ int issymbol_partiel( char t){
 }
 
 int issymbol_total( char t){
-    if((t == '#')||(t == '/')||(t == '\\')||(t == '+')||(t == '-')||(t == '&')||(t == '=')||(t == '%')||(t == '*')||(t == '$')||(t == '!')||(t == '?')||(t == '.')||(t == ',')||(t == ';')||(t == ':')||(t == '_')||(t == '-')||(t == '(')||(t == ')')||(t == '@')||(t == '^')||(t == '\'')){
+    if((t == '#')||(t == '/')||(t == '\\')||(t == '<')||(t == '>')||(t == '+')||(t == '-')||(t == '&')||(t == '=')||(t == '%')||(t == '*')||(t == '$')||(t == '!')||(t == '?')||(t == '.')||(t == ',')||(t == ';')||(t == ':')||(t == '_')||(t == '-')||(t == '(')||(t == ')')||(t == '@')||(t == '^')||(t == '\'')){
         return 1;
     }
     else{ return 0;
