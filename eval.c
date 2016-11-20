@@ -16,7 +16,7 @@ object sfs_eval( object expr ) {
     
     restart :
     
-    if((expr->type==SFS_NUMBER || expr->type==SFS_STRING || expr->type==SFS_BOOLEAN  || expr->type==SFS_CHARACTER || (strcmp(expr->this.symbol,str3) == 0) || (strcmp(expr->this.symbol,str4) == 0))){ /* SFS_PAIR aussi ??????? */
+    if((expr->type==SFS_NUMBER || expr->type == SFS_INFINI || expr->type == SFS_NIL || expr->type==SFS_STRING || expr->type==SFS_BOOLEAN  || expr->type==SFS_CHARACTER || (strcmp(expr->this.symbol,str3) == 0) || (strcmp(expr->this.symbol,str4) == 0))){
         return expr;  /* pas d'eval donc autoevaluant */
     }
     if(expr->type == SFS_SYMBOL){
@@ -140,7 +140,7 @@ object sfs_eval( object expr ) {
                 object ArbreAEvaluer_safe = ArbreAEvaluer;
                 object expr_safe = expr->this.pair.cdr;
                 while(expr_safe != nil){
-                    ArbreAEvaluer_safe->this.pair.car = sfs_eval(expr_safe->this.pair.car);
+                    ArbreAEvaluer_safe->this.pair.car = ((is_form("symbol?",expr))||(is_form("symbol->string",expr))||(is_form("pair?",expr))) ? expr_safe->this.pair.car : sfs_eval(expr_safe->this.pair.car);
                     expr_safe = expr_safe->this.pair.cdr;
                     ArbreAEvaluer_safe->this.pair.cdr = make_object(SFS_PAIR);
                     ArbreAEvaluer_safe = ArbreAEvaluer_safe->this.pair.cdr;
