@@ -210,7 +210,7 @@ object make_primitive(void){
    
     o->this.pair.car = make_object(SFS_PAIR);
     o->this.pair.car->this.pair.car = make_object(SFS_SYMBOL);
-    char str301[256] = {'c','h','a','r','-','>','i','n','t','e','g','e','r'};
+    char str301[256] = {'c','h','a','r','-','>','n','u','m','b','e','r'};
     strcpy(o->this.pair.car->this.pair.car->this.symbol,str301);
     
     o->this.pair.car->this.pair.cdr = make_object(SFS_PRIMITIVE);
@@ -223,7 +223,7 @@ object make_primitive(void){
     
     o->this.pair.car = make_object(SFS_PAIR);
     o->this.pair.car->this.pair.car = make_object(SFS_SYMBOL);
-    char str302[256] = {'i','n','t','e','g','e','r','-','>','c','h','a','r'};
+    char str302[256] = {'n','u','m','b','e','r','-','>','c','h','a','r'};
     strcpy(o->this.pair.car->this.pair.car->this.symbol,str302);
     
     o->this.pair.car->this.pair.cdr = make_object(SFS_PRIMITIVE);
@@ -319,6 +319,32 @@ object make_primitive(void){
     
     o->this.pair.car->this.pair.cdr = make_object(SFS_PRIMITIVE);
     o->this.pair.car->this.pair.cdr->this.primitive.fonction = list_p;
+    
+    o->this.pair.cdr = make_object(SFS_PAIR);
+    o = o->this.pair.cdr;
+    
+    /* eq */
+    
+    o->this.pair.car = make_object(SFS_PAIR);
+    o->this.pair.car->this.pair.car = make_object(SFS_SYMBOL);
+    char str404[256] = {'e','q','?'};
+    strcpy(o->this.pair.car->this.pair.car->this.symbol,str404);
+    
+    o->this.pair.car->this.pair.cdr = make_object(SFS_PRIMITIVE);
+    o->this.pair.car->this.pair.cdr->this.primitive.fonction = eq_p;
+    
+    o->this.pair.cdr = make_object(SFS_PAIR);
+    o = o->this.pair.cdr;
+    
+    /* cons */
+    
+    o->this.pair.car = make_object(SFS_PAIR);
+    o->this.pair.car->this.pair.car = make_object(SFS_SYMBOL);
+    char str405[256] = {'c','o','n','s'};
+    strcpy(o->this.pair.car->this.pair.car->this.symbol,str405);
+    
+    o->this.pair.car->this.pair.cdr = make_object(SFS_PRIMITIVE);
+    o->this.pair.car->this.pair.cdr->this.primitive.fonction = cons_p;
     
     o->this.pair.cdr = make_object(SFS_PAIR);
     o = o->this.pair.cdr;
@@ -719,8 +745,8 @@ object char_number_p (object argAConvertir){
     if(argAConvertir->this.pair.car->type != SFS_CHARACTER){
         ERROR_MSG("\n\nErreur\n");
     }
-    object resObject = argAConvertir;
-    resObject->type = SFS_NUMBER;
+    object resObject = make_object(SFS_NUMBER);
+    resObject->this.number.this.integer = atoi(argAConvertir->this.pair.car->this.string);
     return resObject;
 }
 
@@ -728,8 +754,11 @@ object number_char_p (object argAConvertir){
     if(argAConvertir->this.pair.car->type != SFS_NUMBER){
         ERROR_MSG("\n\nErreur\n");
     }
-    object resObject = argAConvertir;
-    resObject->type = SFS_CHARACTER;
+    object resObject = make_object(SFS_CHARACTER);
+    resObject->this.character = (char) argAConvertir->this.pair.car->this.number.this.integer;
+    /*char strosef[256];
+    sprintf(strosef, "%d", argAConvertir->this.pair.car->this.number.this.integer);
+    strcpy(resObject->this.string,strosef); */
     return resObject;
 }
 
@@ -737,8 +766,10 @@ object number_string_p (object argAConvertir){
     if(argAConvertir->this.pair.car->type != SFS_NUMBER){
         ERROR_MSG("\n\nErreur\n");
     }
-    object resObject = argAConvertir;
-    resObject->type = SFS_STRING;
+    char strnumber[256];
+    object resObject = make_object(SFS_STRING);
+    sprintf(strnumber, "%d", argAConvertir->this.pair.car->this.number.this.integer);
+    strcpy(resObject->this.string,strnumber);
     return resObject;
 }
 
@@ -746,8 +777,8 @@ object string_number_p (object argAConvertir){
     if(argAConvertir->this.pair.car->type != SFS_STRING){
         ERROR_MSG("\n\nErreur\n");
     }
-    object resObject = argAConvertir;
-    resObject->type = SFS_NUMBER;
+    object resObject = make_object(SFS_NUMBER);
+    resObject->this.number.this.integer = atoi(argAConvertir->this.pair.car->this.string);
     return resObject;
 }
 
@@ -777,6 +808,70 @@ object cdr_p (object arbreAUtiliser){
     return arbreAUtiliser->this.pair.cdr;
 }
 
-object list_p(object arbreAUtiliser){
+object list_p (object arbreAUtiliser){
     return arbreAUtiliser;
+}
+
+object eq_p (object arbreAUtiliser){
+    object resObject = make_object(SFS_BOOLEAN);
+    object test = arbreAUtiliser;
+    if(test->this.pair.cdr->this.pair.cdr->this.pair.car != NULL){
+        ERROR_MSG("\n\nTrop d'arguments\n");
+    }
+    object obj1 = arbreAUtiliser->this.pair.car;
+    object obj2 = arbreAUtiliser->this.pair.cdr->this.pair.car;
+    
+    eq :
+    
+    if(obj1->type != obj2->type){
+        ERROR_MSG("\n\nArguments de nature differentes\n");
+    }
+    if(obj1->type == SFS_NUMBER){
+        if(obj1->this.number.this.integer == obj2->this.number.this.integer){
+            resObject->this.number.this.integer = 1;
+            return resObject;
+        }
+        resObject->this.number.this.integer = 0;
+        return resObject;
+    }
+    if(obj1->type == SFS_BOOLEAN){
+        if(obj1->this.number.this.integer == obj2->this.number.this.integer){
+            resObject->this.number.this.integer = 1;
+            return resObject;
+        }
+        resObject->this.number.this.integer = 0;
+        return resObject;
+    }
+    if((obj2->type == SFS_STRING)||(obj2->type == SFS_SYMBOL)){
+        if(strcmp(obj1->this.string,obj2->this.string) == 0){
+            resObject->this.number.this.integer = 1;
+            return resObject;
+        }
+        resObject->this.number.this.integer = 0;
+        return resObject;
+    }
+    if(obj2->type == SFS_NIL){
+        resObject->this.number.this.integer = 1;
+        return resObject;
+    }
+    if(obj1->type == SFS_CHARACTER){
+        if(obj1->this.character == obj2->this.character){
+            resObject->this.number.this.integer = 1;
+            return resObject;
+        }
+        resObject->this.number.this.integer = 0;
+        return resObject;
+    }
+    if(obj1->type == SFS_PAIR){
+        obj1 = sfs_eval(obj1);
+        obj2 = sfs_eval(obj2);
+        goto eq;
+    }
+    
+    return resObject;
+}
+
+object cons_p (object arbreAUtiliser){
+    object resObject = cons(arbreAUtiliser->this.pair.car , cons(arbreAUtiliser->this.pair.cdr->this.pair.car,nil));
+    return resObject;
 }
