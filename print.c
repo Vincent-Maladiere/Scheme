@@ -10,6 +10,18 @@
  * Printing stuff for SFS.
  */
 
+
+
+#include <stdio.h>
+/**
+ * @file print.c
+ * @author François Cayre <cayre@yiking.(null)>
+ * @date Fri Jun 22 20:12:17 2012
+ * @brief Printing stuff for SFS.
+ *
+ * Printing stuff for SFS.
+ */
+
 #include "print.h"
 
 #include <stdio.h>
@@ -22,17 +34,18 @@ void sfs_print_atom( object o ) {
         printf("\"%s\"",o->this.string);
     }
     if(o->type == SFS_CHARACTER){
-        printf("#\\%c",o->this.character); /* ?? */
-    }
-    if(o->type == SFS_SYMBOL){
         char str1[256] = {'n','e','w','l','i','n','e'};
         char str2[256] = {'s','p','a','c','e'};
         if((strcmp(o->this.symbol,str1) == 0)||(strcmp(o->this.symbol,str2) == 0)){
             printf("#\\%s",o->this.symbol);
         }
+        
         else{
-            printf("%s",o->this.symbol);
+            printf("#\\%c",o->this.character); /* ?? */
         }
+    }
+    if((o->type == SFS_SYMBOL)||(o->type == SFS_INFINI)){
+        printf("%s",o->this.symbol);
     }
     if(o->type == SFS_BOOLEAN){
         (o->this.number.this.integer == 0) ? printf("#f") : printf("#t");
@@ -80,7 +93,7 @@ void sfs_print_pair_save_old( object o ) {
 void sfs_print_pair( object o ) {
 
     printf("(");
-    while(o != nil)
+    while((o != nil)&&(o->this.pair.car != NULL))
     {
         sfs_print(o->this.pair.car);
         o = o->this.pair.cdr;
