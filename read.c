@@ -348,7 +348,7 @@ object sfs_read_atom( char *input, uint *here ) {
         caractere[i] = input[*here];
         i++;
         (*here)++;
-        if(((input[*here-1]=='+')&&((isblank(input[*here]))||(input[*here] == '\0')))||((input[*here-1]=='-')&&((isblank(input[*here]))||(input[*here] == '\0')))){
+        if(((input[*here-1]=='+')&&((isblank(input[*here]))||(input[*here] == '\0')||(input[*here] == ')')))||((input[*here-1]=='-')&&((isblank(input[*here]))||(input[*here] == ')')||(input[*here] == '\0')))){
             atom = make_object(SFS_SYMBOL);
             strcpy(atom->this.symbol,caractere);
         }
