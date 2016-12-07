@@ -381,7 +381,7 @@ object make_primitive(void){
 
 
 
-object plus_p (object arbreAAditionner){
+object plus_p (object arbreAAditionner, object environnement){
     int res = 0;
     int bit_infini = 1;
     while(arbreAAditionner->this.pair.car != NULL){
@@ -423,7 +423,7 @@ object plus_p (object arbreAAditionner){
     return resObject;
 }
 
-object moins_p (object arbreASoustraire){
+object moins_p (object arbreASoustraire, object environnement){
     int res = (arbreASoustraire->this.pair.car->type == SFS_INFINI) ? 0 : arbreASoustraire->this.pair.car->this.number.this.integer;
     if(arbreASoustraire->this.pair.car->type == SFS_NUMBER){
         arbreASoustraire = arbreASoustraire->this.pair.cdr;
@@ -469,7 +469,7 @@ object moins_p (object arbreASoustraire){
 }
 
 
-object multiplier_p (object arbreAMultiplier){
+object multiplier_p (object arbreAMultiplier, object environnement){
     int res = 1;
     int bit_infini = 1;
    /* arbreAMultiplier = arbreAMultiplier->this.pair.cdr; */
@@ -519,7 +519,7 @@ object multiplier_p (object arbreAMultiplier){
     return resObject;
 }
 
-object diviser_p (object arbreADiviser){
+object diviser_p (object arbreADiviser, object environnement){
     int bit_infini_num = 1;
     int numerateur = (arbreADiviser->this.pair.car->type == SFS_INFINI) ? 1 : arbreADiviser->this.pair.car->this.number.this.integer;
     if(strcmp(arbreADiviser->this.pair.car->this.symbol,str3)== 0){
@@ -577,7 +577,7 @@ object diviser_p (object arbreADiviser){
     ERROR_MSG("\n\nProbleme dans la division\n");
 }
 
-object rest_p (object arbreADiviser){
+object rest_p (object arbreADiviser, object environnement){
     int bit_infini_num = 1;
     int numerateur = (arbreADiviser->this.pair.car->type == SFS_INFINI) ? 1 : arbreADiviser->this.pair.car->this.number.this.integer;
     if(strcmp(arbreADiviser->this.pair.car->this.symbol,str3)== 0){
@@ -605,7 +605,7 @@ object rest_p (object arbreADiviser){
     ERROR_MSG("\n\nProbleme dans la division\n");
 }
 
-object egal_p (object ArbreATester){
+object egal_p (object ArbreATester, object environnement){
     object resObject = make_object(SFS_BOOLEAN);
     if(ArbreATester->this.pair.car->type != SFS_NUMBER){
         ERROR_MSG("\n\nEntrer des Entiers\n");
@@ -628,7 +628,7 @@ object egal_p (object ArbreATester){
     return resObject;
 }
 
-object inf_p (object ArbreATester){
+object inf_p (object ArbreATester, object environnement){
     object resObject = make_object(SFS_BOOLEAN);
     int comparant = ArbreATester->this.pair.car->this.number.this.integer;
     ArbreATester = ArbreATester->this.pair.cdr;
@@ -649,7 +649,7 @@ object inf_p (object ArbreATester){
     return resObject;
 }
 
-object sup_p (object ArbreATester){
+object sup_p (object ArbreATester, object environnement){
     object resObject = make_object(SFS_BOOLEAN);
     int comparant = ArbreATester->this.pair.car->this.number.this.integer;
     ArbreATester = ArbreATester->this.pair.cdr;
@@ -671,7 +671,7 @@ object sup_p (object ArbreATester){
 }
 
 
-object boolean_p (object arbreATester){
+object boolean_p (object arbreATester, object environnement){
     while(arbreATester->this.pair.car != NULL){
         if(arbreATester->this.pair.car->type == SFS_BOOLEAN){
             arbreATester = arbreATester->this.pair.cdr;
@@ -687,7 +687,7 @@ object boolean_p (object arbreATester){
     return res;
 }
 
-object string_p (object arbreATester){
+object string_p (object arbreATester, object environnement){
     while(arbreATester->this.pair.car != NULL){
         if(arbreATester->this.pair.car->type == SFS_STRING){
             arbreATester = arbreATester->this.pair.cdr;
@@ -703,7 +703,7 @@ object string_p (object arbreATester){
     return res;
 }
 
-object symbol_p (object arbreATester){
+object symbol_p (object arbreATester, object environnement){
     while(arbreATester->this.pair.car != NULL){
         if(arbreATester->this.pair.car->type == SFS_SYMBOL){
             arbreATester = arbreATester->this.pair.cdr;
@@ -719,7 +719,7 @@ object symbol_p (object arbreATester){
     return res;
 }
 
-object integer_p (object arbreATester){
+object integer_p (object arbreATester, object environnement){
     while(arbreATester->this.pair.car != NULL){
         if(arbreATester->this.pair.car->type == SFS_NUMBER){
             arbreATester = arbreATester->this.pair.cdr;
@@ -735,7 +735,7 @@ object integer_p (object arbreATester){
     return res;
 }
 
-object pair_p (object arbreATester){
+object pair_p (object arbreATester, object environnement){
     while(arbreATester->this.pair.car != NULL){
         if(arbreATester->this.pair.car->type == SFS_PAIR){
             arbreATester = arbreATester->this.pair.cdr;
@@ -751,7 +751,7 @@ object pair_p (object arbreATester){
     return res;
 }
 
-object null_p (object arbreATester){
+object null_p (object arbreATester, object environnement){
     while(arbreATester->this.pair.car != NULL){
         if(arbreATester->this.pair.car->type == SFS_NIL){
             arbreATester = arbreATester->this.pair.cdr;
@@ -767,7 +767,7 @@ object null_p (object arbreATester){
     return res;
 }
 
-object char_number_p (object argAConvertir){
+object char_number_p (object argAConvertir, object environnement){
     if(argAConvertir->this.pair.car->type != SFS_CHARACTER){
         ERROR_MSG("\n\nErreur\n");
     }
@@ -776,7 +776,7 @@ object char_number_p (object argAConvertir){
     return resObject;
 }
 
-object number_char_p (object argAConvertir){
+object number_char_p (object argAConvertir, object environnement){
     if(argAConvertir->this.pair.car->type != SFS_NUMBER){
         ERROR_MSG("\n\nErreur\n");
     }
@@ -788,7 +788,7 @@ object number_char_p (object argAConvertir){
     return resObject;
 }
 
-object number_string_p (object argAConvertir){
+object number_string_p (object argAConvertir, object environnement){
     if(argAConvertir->this.pair.car->type != SFS_NUMBER){
         ERROR_MSG("\n\nErreur\n");
     }
@@ -799,7 +799,7 @@ object number_string_p (object argAConvertir){
     return resObject;
 }
 
-object string_number_p (object argAConvertir){
+object string_number_p (object argAConvertir, object environnement){
     if(argAConvertir->this.pair.car->type != SFS_STRING){
         ERROR_MSG("\n\nErreur\n");
     }
@@ -808,7 +808,7 @@ object string_number_p (object argAConvertir){
     return resObject;
 }
 
-object symbol_string_p (object argAConvertir){
+object symbol_string_p (object argAConvertir, object environnement){
     if(argAConvertir->this.pair.car->type != SFS_SYMBOL){
         ERROR_MSG("\n\nErreur\n");
     }
@@ -817,7 +817,7 @@ object symbol_string_p (object argAConvertir){
     return resObject;
 }
 
-object string_symbol_p (object argAConvertir){
+object string_symbol_p (object argAConvertir, object environnement){
     if(argAConvertir->this.pair.car->type != SFS_STRING){
         ERROR_MSG("\n\nErreur\n");
     }
@@ -826,19 +826,19 @@ object string_symbol_p (object argAConvertir){
     return resObject;
 }
 
-object car_p (object arbreAUtiliser){
+object car_p (object arbreAUtiliser, object environnement){
     return arbreAUtiliser->this.pair.car->this.pair.car;
 }
 
-object cdr_p (object arbreAUtiliser){
+object cdr_p (object arbreAUtiliser, object environnement){
     return arbreAUtiliser->this.pair.car->this.pair.cdr;
 }
 
-object list_p (object arbreAUtiliser){
+object list_p (object arbreAUtiliser, object environnement){
     return arbreAUtiliser;
 }
 
-object eq_p (object arbreAUtiliser){
+object eq_p (object arbreAUtiliser, object environnement){
     object resObject = make_object(SFS_BOOLEAN);
     object test = arbreAUtiliser;
     if(test->this.pair.cdr->this.pair.cdr->this.pair.car != NULL){
@@ -897,12 +897,12 @@ object eq_p (object arbreAUtiliser){
     return resObject;
 }
 
-object cons_p (object arbreAUtiliser){
+object cons_p (object arbreAUtiliser, object environnement){
     object resObject = cons(arbreAUtiliser->this.pair.car , cons(arbreAUtiliser->this.pair.cdr->this.pair.car,nil));
     return resObject;
 }
 
-object set_car_p (object arbreAUtiliser){
+object set_car_p (object arbreAUtiliser, object environnement){
     if(arbreAUtiliser->this.pair.car->type != SFS_PAIR){
         ERROR_MSG("\n\nset!_car ne s'applique qu'à une paire\n");
     }
@@ -917,7 +917,7 @@ object set_car_p (object arbreAUtiliser){
     return resObject;
 }
 
-object set_cdr_p (object arbreAUtiliser){
+object set_cdr_p (object arbreAUtiliser, object environnement){
     if(arbreAUtiliser->this.pair.car->type != SFS_PAIR){
         ERROR_MSG("\n\nset!_car ne s'applique qu'à une paire\n");
     }
