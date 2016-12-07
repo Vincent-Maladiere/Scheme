@@ -1,3 +1,14 @@
+
+
+/**
+ * @file eval.c
+ * @author François Cayre <cayre@yiking.(null)>
+ * @date Fri Jun 22 20:11:30 2012
+ * @brief Evaluation stuff for SFS.
+ *
+ * Evaluation stuff for SFS.
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -17,9 +28,18 @@ object sfs_eval( object expr ) {
     restart :
     
     if((expr->type==SFS_NUMBER || expr->type == SFS_INFINI || expr->type == SFS_NIL || expr->type==SFS_STRING || expr->type==SFS_BOOLEAN  || expr->type==SFS_CHARACTER || (strcmp(expr->this.symbol,str3) == 0) || (strcmp(expr->this.symbol,str4) == 0))){
-        return expr;  /* pas d'eval donc autoevaluant */
+        return expr;  /* pas d'eval puisqu'autoevaluant */
     }
     if(expr->type == SFS_SYMBOL){
+        object prim_safe = list_prim->this.pair.cdr; /* attention 'cdr' et pas 'car' pour list_prim, contrairement à env */
+        while(prim_safe->this.pair.car != NULL){
+            if(strcmp(prim_safe->this.pair.car->this.pair.car->this.symbol, expr->this.symbol) == 0){
+                object result = make_object(SFS_SYMBOL);
+                strcpy(result->this.symbol,expr->this.symbol);
+                return result;
+            }
+            prim_safe = prim_safe->this.pair.cdr;
+        }
         object cherchemaggle = make_object(SFS_PAIR);
         cherchemaggle = env->this.pair.car;
         if(cherchemaggle == NULL){
@@ -130,10 +150,29 @@ object sfs_eval( object expr ) {
         }
     }
     
+    if(is_form("begin", expr) == 1){
+        object resultat = NULL;
+        expr = expr->this.pair.cdr;
+        while (expr->type != SFS_NIL){
+            resultat =  sfs_eval(expr->this.pair.car);
+            expr = expr->this.pair.cdr;
+        }
+        return resultat;
+    }
+
+  
+    
+    
     
     else{
-        object prim_safe = NULL;
-        prim_safe = list_prim->this.pair.cdr;
+        object prim_safe = list_prim->this.pair.cdr;
+        object env_safe = env->this.pair.car;
+        while(env_safe != NULL){
+            if(is_form(env_safe->this.pair.car->this.pair.car->this.symbol,expr) == 1){
+                strcpy(expr->this.pair.car->this.symbol,env_safe->this.pair.car->this.pair.cdr->this.symbol);
+            }
+            env_safe = env_safe->this.pair.cdr;
+        }
         while(prim_safe->this.pair.car != NULL){
             if(is_form(prim_safe->this.pair.car->this.pair.car->this.symbol, expr) == 1){
                 object ArbreAEvaluer = make_object(SFS_PAIR);
