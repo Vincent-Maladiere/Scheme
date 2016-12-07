@@ -349,6 +349,32 @@ object make_primitive(void){
     o->this.pair.cdr = make_object(SFS_PAIR);
     o = o->this.pair.cdr;
     
+    /* set!_car */
+    
+    o->this.pair.car = make_object(SFS_PAIR);
+    o->this.pair.car->this.pair.car = make_object(SFS_SYMBOL);
+    char str406[256] = {'s','e','t','!','_','c','a','r'};
+    strcpy(o->this.pair.car->this.pair.car->this.symbol,str406);
+    
+    o->this.pair.car->this.pair.cdr = make_object(SFS_PRIMITIVE);
+    o->this.pair.car->this.pair.cdr->this.primitive.fonction = set_car_p;
+    
+    o->this.pair.cdr = make_object(SFS_PAIR);
+    o = o->this.pair.cdr;
+
+    /* set!_cdr */
+    
+    o->this.pair.car = make_object(SFS_PAIR);
+    o->this.pair.car->this.pair.car = make_object(SFS_SYMBOL);
+    char str407[256] = {'s','e','t','!','_','c','d','r'};
+    strcpy(o->this.pair.car->this.pair.car->this.symbol,str407);
+    
+    o->this.pair.car->this.pair.cdr = make_object(SFS_PRIMITIVE);
+    o->this.pair.car->this.pair.cdr->this.primitive.fonction = set_cdr_p;
+    
+    o->this.pair.cdr = make_object(SFS_PAIR);
+    o = o->this.pair.cdr;
+    
     return list_prim;
 }
 
@@ -801,11 +827,11 @@ object string_symbol_p (object argAConvertir){
 }
 
 object car_p (object arbreAUtiliser){
-    return arbreAUtiliser->this.pair.car;
+    return arbreAUtiliser->this.pair.car->this.pair.car;
 }
 
 object cdr_p (object arbreAUtiliser){
-    return arbreAUtiliser->this.pair.cdr;
+    return arbreAUtiliser->this.pair.car->this.pair.cdr;
 }
 
 object list_p (object arbreAUtiliser){
@@ -873,5 +899,33 @@ object eq_p (object arbreAUtiliser){
 
 object cons_p (object arbreAUtiliser){
     object resObject = cons(arbreAUtiliser->this.pair.car , cons(arbreAUtiliser->this.pair.cdr->this.pair.car,nil));
+    return resObject;
+}
+
+object set_car_p (object arbreAUtiliser){
+    if(arbreAUtiliser->this.pair.car->type != SFS_PAIR){
+        ERROR_MSG("\n\nset!_car ne s'applique qu'à une paire\n");
+    }
+    if(arbreAUtiliser->this.pair.cdr->this.pair.car == NULL){
+        ERROR_MSG("\n\n2 Arguments attendus\n");
+    }
+    if(arbreAUtiliser->this.pair.cdr->this.pair.cdr->this.pair.car != NULL){
+        ERROR_MSG("\n\nTrop d'argument");
+    }
+    object resObject = arbreAUtiliser->this.pair.car;
+    resObject->this.pair.car = arbreAUtiliser->this.pair.cdr->this.pair.car;
+    return resObject;
+}
+
+object set_cdr_p (object arbreAUtiliser){
+    if(arbreAUtiliser->this.pair.car->type != SFS_PAIR){
+        ERROR_MSG("\n\nset!_car ne s'applique qu'à une paire\n");
+    }
+    if(arbreAUtiliser->this.pair.cdr->this.pair.cdr->this.pair.car != NULL){
+        ERROR_MSG("\n\nTrop d'argument\n");
+    }
+    object resObject = arbreAUtiliser->this.pair.car;
+    resObject->this.pair.cdr->this.pair.car = arbreAUtiliser->this.pair.cdr->this.pair.car;
+    resObject->this.pair.cdr->this.pair.cdr->this.pair.car = NULL;
     return resObject;
 }
