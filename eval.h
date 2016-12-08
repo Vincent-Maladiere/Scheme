@@ -1,14 +1,3 @@
-
-
-/**
- * @file eval.h
- * @author François Cayre <cayre@yiking.(null)>
- * @date Fri Jun 22 20:10:38 2012
- * @brief Evaluation stuff for SFS.
- *
- * Evaluation stuff for SFS.
- */
-
 #ifndef _EVAL_H_
 #define _EVAL_H_
 
@@ -28,10 +17,9 @@ extern "C" {
 #include "print.h"
 
     
-    object sfs_eval( object );
+    object sfs_eval( object expr, object env );
     int is_form (char *name, object expr);
-    void change_env ();
-    void back_to_head_env ();
+    object make_lambda(object expr);
     
 #ifdef __cplusplus
 }
