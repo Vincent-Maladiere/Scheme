@@ -378,7 +378,7 @@ object sfs_read_atom( char *input, uint *here ) {
                 atom->this.number.this.integer = atoi(caractere);
             }
             else{
-                ERROR_MSG("\n Entier Invalide\n");
+                WARNING_MSG("\n Entier Invalide\n");
             }
     
         }
@@ -397,7 +397,7 @@ object sfs_read_atom( char *input, uint *here ) {
             (*here)++;
         }
         else{
-            ERROR_MSG("\n String Invalide\n");
+            WARNING_MSG("\n String Invalide\n");
         }
     }
     if(input[*here] == '#'){ /*boucle caractere*/
@@ -425,7 +425,7 @@ object sfs_read_atom( char *input, uint *here ) {
                 return atom;
             }
             else{
-                ERROR_MSG("\n Caractère invalide\n");
+                WARNING_MSG("\n Caractère invalide\n");
             }
         }
         if((input[*here] == 't')||(input[*here] == 'f')){
@@ -436,7 +436,7 @@ object sfs_read_atom( char *input, uint *here ) {
                 atom->this.number.this.integer = (input[*here-1] == 't') ? 1 : 0;
             }
             else{
-                ERROR_MSG("\n Booléen Invalide\n");
+                WARNING_MSG("\n Booléen Invalide\n");
             }
         }
     }
@@ -464,7 +464,7 @@ object sfs_read_atom( char *input, uint *here ) {
             strcpy(atom->this.symbol,caractere);
         }
         else{
-            ERROR_MSG("\n Symbol Invalide\n");
+            WARNING_MSG("\n Symbol Invalide\n");
         }
     }
     
