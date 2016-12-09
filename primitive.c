@@ -1,11 +1,3 @@
-//
-//  primitive.c
-//  Scheme
-//
-//  Created by Vincent Maladiere on 16/11/16.
-//  Copyright © 2016 Vincent Maladiere. All rights reserved.
-//
-
 #include "primitive.h"
 
 char str1[256] = {'n','e','w','l','i','n','e'};
@@ -399,7 +391,8 @@ object plus_p (object arbreAAditionner){
             bit_erreur = 1;
         }
         if(bit_erreur == 0){
-            ERROR_MSG("\n Il y a un non entier dans l'arbre argument");
+            WARNING_MSG("\n Il y a un non entier dans l'arbre argument ou pas assez de parametres");
+            return NULL;
         }
         arbreAAditionner = arbreAAditionner->this.pair.cdr;
     }
@@ -444,7 +437,8 @@ object moins_p (object arbreASoustraire){
             bit_erreur = 1;
         }
         if(bit_erreur == 0){
-            ERROR_MSG("\n Il y a un non entier dans l'arbre argument");
+            WARNING_MSG("\n Il y a un non entier dans l'arbre argument ou pas assez de parametres");
+            return NULL;
         }
         arbreASoustraire = arbreASoustraire->this.pair.cdr;
     }
@@ -471,49 +465,63 @@ object moins_p (object arbreASoustraire){
 
 object multiplier_p (object arbreAMultiplier){
     int res = 1;
-    int bit_infini = 1;
+    int bit_infini = 0;
    /* arbreAMultiplier = arbreAMultiplier->this.pair.cdr; */
     while(arbreAMultiplier->this.pair.car != NULL){
-        int bit_erreur = 0; /* Permet de corriger une erreur sur le error_msg qui revient systematiquement*/
+        int bit_erreur = 1; /* Permet de corriger une erreur sur le error_msg qui revient systematiquement*/
         if(arbreAMultiplier->this.pair.car->type == SFS_NUMBER){
             res *= arbreAMultiplier->this.pair.car->this.number.this.integer;
-            bit_erreur = 1;
+            bit_erreur = 0;
         }
-        if((strcmp(str3,arbreAMultiplier->this.pair.car->this.symbol) == 0)&&(bit_infini > 0)){
-            bit_infini = 2;
-            bit_erreur = 1;
+        if((strcmp(str3,arbreAMultiplier->this.pair.car->this.symbol) == 0)&&(bit_infini != -1)){
+            bit_infini = 1;
+            bit_erreur = 0;
             if(res == 0){
                 goto undef;
             }
         }
-        if(strcmp(str4,arbreAMultiplier->this.pair.car->this.symbol) == 0){
+        if((strcmp(str3,arbreAMultiplier->this.pair.car->this.symbol) == 0)&&(bit_infini == -1)){
+            bit_erreur = 0;
+            if(res == 0){
+                goto undef;
+            }
+        }
+        if((strcmp(str4,arbreAMultiplier->this.pair.car->this.symbol) == 0)&&(bit_infini != 0)){
             bit_infini *= -1;
-            bit_erreur = 1;
+            bit_erreur = 0;
             if(res == 0){
                 goto undef;
             }
         }
-        if((arbreAMultiplier->this.pair.car->this.number.this.integer == 0)&&(arbreAMultiplier->this.pair.car->type == SFS_NUMBER)&&(bit_infini != 1)){
+        if((strcmp(str4,arbreAMultiplier->this.pair.car->this.symbol) == 0)&&(bit_infini == 0)){
+            bit_infini = -1;
+            bit_erreur = 0;
+            if(res == 0){
+                goto undef;
+            }
+        }
+        if((arbreAMultiplier->this.pair.car->this.number.this.integer == 0)&&(arbreAMultiplier->this.pair.car->type == SFS_NUMBER)&&(bit_infini != 0)){
             undef : ;
             object resObject = make_object(SFS_INFINI);
             strcpy(resObject->this.symbol,str000);
             return resObject;
         }
-        if(bit_erreur == 0){
-            ERROR_MSG("\n\nIl y a un non entier dans l'arbre argument\n");
+        if(bit_erreur == 1){
+            WARNING_MSG("\n\nIl y a un non entier dans l'arbre argument\n");
+            return NULL;
         }
         arbreAMultiplier = arbreAMultiplier->this.pair.cdr;
     }
-    if(bit_infini == 1){
+    if(bit_infini == 0){
         object resObject = make_object(SFS_NUMBER);
         resObject->this.number.this.integer = res;
         return resObject;
     }
     object resObject = make_object(SFS_INFINI);
-    if(bit_infini == 2){
+    if(bit_infini == 1){
         strcpy(resObject->this.symbol,str3);
     }
-    if(bit_infini < 0){
+    if(bit_infini == -1){
         strcpy(resObject->this.symbol,str4);
     }
     return resObject;
@@ -521,6 +529,9 @@ object multiplier_p (object arbreAMultiplier){
 
 object diviser_p (object arbreADiviser){
     int bit_infini_num = 1;
+    if((arbreADiviser->this.pair.car->type != SFS_NUMBER)&&(arbreADiviser->this.pair.car->type != SFS_INFINI)){
+        WARNING_MSG("\n\nLe numerateur doit être un nombre\n");
+    }
     int numerateur = (arbreADiviser->this.pair.car->type == SFS_INFINI) ? 1 : arbreADiviser->this.pair.car->this.number.this.integer;
     if(strcmp(arbreADiviser->this.pair.car->this.symbol,str3)== 0){
         bit_infini_num = 2;
@@ -574,7 +585,8 @@ object diviser_p (object arbreADiviser){
         strcpy(resObject->this.symbol,str000);
         return resObject;
     }
-    ERROR_MSG("\n\nProbleme dans la division\n");
+    WARNING_MSG("\n\nProbleme dans la division\n");
+    return NULL;
 }
 
 object rest_p (object arbreADiviser){
@@ -602,18 +614,21 @@ object rest_p (object arbreADiviser){
         return resObject;
     }
 
-    ERROR_MSG("\n\nProbleme dans la division\n");
+    WARNING_MSG("\n\nProbleme dans la division\n");
+    return NULL;
 }
 
 object egal_p (object ArbreATester){
     object resObject = make_object(SFS_BOOLEAN);
     if(ArbreATester->this.pair.car->type != SFS_NUMBER){
-        ERROR_MSG("\n\nEntrer des Entiers\n");
+        WARNING_MSG("\n\nEntrer des Entiers\n");
+        return NULL;
     }
     int comparant = ArbreATester->this.pair.car->this.number.this.integer;
     while(ArbreATester->this.pair.car != NULL){
         if(ArbreATester->this.pair.car->type != SFS_NUMBER){
-            ERROR_MSG("\n\nEntrer des Entiers\n");
+            WARNING_MSG("\n\nEntrer des Entiers\n");
+            return NULL;
         }
         if(ArbreATester->this.pair.car->this.number.this.integer == comparant){
             ArbreATester = ArbreATester->this.pair.cdr;
@@ -634,7 +649,8 @@ object inf_p (object ArbreATester){
     ArbreATester = ArbreATester->this.pair.cdr;
     while(ArbreATester->this.pair.car != NULL){
         if(ArbreATester->this.pair.car->type != SFS_NUMBER){
-            ERROR_MSG("\n\nEntrer des Entiers\n");
+            WARNING_MSG("\n\nEntrer des Entiers\n");
+            return NULL;
         }
         if(ArbreATester->this.pair.car->this.number.this.integer <= comparant){
             resObject->this.number.this.integer = 0;
@@ -655,7 +671,8 @@ object sup_p (object ArbreATester){
     ArbreATester = ArbreATester->this.pair.cdr;
     while(ArbreATester->this.pair.car != NULL){
         if(ArbreATester->this.pair.car->type != SFS_NUMBER){
-            ERROR_MSG("\n\nEntrer des Entiers\n");
+            WARNING_MSG("\n\nEntrer des Entiers\n");
+            return NULL;
         }
         if(ArbreATester->this.pair.car->this.number.this.integer >= comparant){
             resObject->this.number.this.integer = 0;
@@ -769,7 +786,8 @@ object null_p (object arbreATester){
 
 object char_number_p (object argAConvertir){
     if(argAConvertir->this.pair.car->type != SFS_CHARACTER){
-        ERROR_MSG("\n\nErreur\n");
+        WARNING_MSG("\n\nErreur\n");
+        return NULL;
     }
     object resObject = make_object(SFS_NUMBER);
     resObject->this.number.this.integer = atoi(argAConvertir->this.pair.car->this.string);
@@ -778,7 +796,8 @@ object char_number_p (object argAConvertir){
 
 object number_char_p (object argAConvertir){
     if(argAConvertir->this.pair.car->type != SFS_NUMBER){
-        ERROR_MSG("\n\nErreur\n");
+        WARNING_MSG("\n\nErreur\n");
+        return NULL;
     }
     object resObject = make_object(SFS_CHARACTER);
     resObject->this.character = (char) argAConvertir->this.pair.car->this.number.this.integer;
@@ -790,7 +809,8 @@ object number_char_p (object argAConvertir){
 
 object number_string_p (object argAConvertir){
     if(argAConvertir->this.pair.car->type != SFS_NUMBER){
-        ERROR_MSG("\n\nErreur\n");
+        WARNING_MSG("\n\nErreur\n");
+        return NULL;
     }
     char strnumber[256];
     object resObject = make_object(SFS_STRING);
@@ -801,7 +821,8 @@ object number_string_p (object argAConvertir){
 
 object string_number_p (object argAConvertir){
     if(argAConvertir->this.pair.car->type != SFS_STRING){
-        ERROR_MSG("\n\nErreur\n");
+        WARNING_MSG("\n\nErreur\n");
+        return NULL;
     }
     object resObject = make_object(SFS_NUMBER);
     resObject->this.number.this.integer = atoi(argAConvertir->this.pair.car->this.string);
@@ -810,7 +831,8 @@ object string_number_p (object argAConvertir){
 
 object symbol_string_p (object argAConvertir){
     if(argAConvertir->this.pair.car->type != SFS_SYMBOL){
-        ERROR_MSG("\n\nErreur\n");
+        WARNING_MSG("\n\nErreur\n");
+        return NULL;
     }
     object resObject = argAConvertir->this.pair.car;
     resObject->type = SFS_STRING;
@@ -819,7 +841,8 @@ object symbol_string_p (object argAConvertir){
 
 object string_symbol_p (object argAConvertir){
     if(argAConvertir->this.pair.car->type != SFS_STRING){
-        ERROR_MSG("\n\nErreur\n");
+        WARNING_MSG("\n\nErreur\n");
+        return NULL;
     }
     object resObject = argAConvertir->this.pair.car;
     resObject->type = SFS_SYMBOL;
@@ -842,7 +865,8 @@ object eq_p (object arbreAUtiliser){
     object resObject = make_object(SFS_BOOLEAN);
     object test = arbreAUtiliser;
     if(test->this.pair.cdr->this.pair.cdr->this.pair.car != NULL){
-        ERROR_MSG("\n\nTrop d'arguments\n");
+        WARNING_MSG("\n\nTrop d'arguments\n");
+        return NULL;
     }
     object obj1 = arbreAUtiliser->this.pair.car;
     object obj2 = arbreAUtiliser->this.pair.cdr->this.pair.car;
@@ -850,7 +874,8 @@ object eq_p (object arbreAUtiliser){
     eq :
     
     if(obj1->type != obj2->type){
-        ERROR_MSG("\n\nArguments de nature differentes\n");
+        WARNING_MSG("\n\nArguments de nature differentes\n");
+        return NULL;
     }
     if(obj1->type == SFS_NUMBER){
         if(obj1->this.number.this.integer == obj2->this.number.this.integer){
@@ -904,13 +929,16 @@ object cons_p (object arbreAUtiliser){
 
 object set_car_p (object arbreAUtiliser){
     if(arbreAUtiliser->this.pair.car->type != SFS_PAIR){
-        ERROR_MSG("\n\nset!_car ne s'applique qu'à une paire\n");
+        WARNING_MSG("\n\nset!_car ne s'applique qu'à une paire\n");
+        return NULL;
     }
     if(arbreAUtiliser->this.pair.cdr->this.pair.car == NULL){
-        ERROR_MSG("\n\n2 Arguments attendus\n");
+        WARNING_MSG("\n\n2 Arguments attendus\n");
+        return NULL;
     }
     if(arbreAUtiliser->this.pair.cdr->this.pair.cdr->this.pair.car != NULL){
-        ERROR_MSG("\n\nTrop d'argument");
+        WARNING_MSG("\n\nTrop d'argument");
+        return NULL;
     }
     object resObject = arbreAUtiliser->this.pair.car;
     resObject->this.pair.car = arbreAUtiliser->this.pair.cdr->this.pair.car;
@@ -919,10 +947,12 @@ object set_car_p (object arbreAUtiliser){
 
 object set_cdr_p (object arbreAUtiliser){
     if(arbreAUtiliser->this.pair.car->type != SFS_PAIR){
-        ERROR_MSG("\n\nset!_car ne s'applique qu'à une paire\n");
+        WARNING_MSG("\n\nset!_car ne s'applique qu'à une paire\n");
+        return NULL;
     }
     if(arbreAUtiliser->this.pair.cdr->this.pair.cdr->this.pair.car != NULL){
-        ERROR_MSG("\n\nTrop d'argument\n");
+        WARNING_MSG("\n\nTrop d'argument\n");
+        return NULL;
     }
     object resObject = arbreAUtiliser->this.pair.car;
     resObject->this.pair.cdr->this.pair.car = arbreAUtiliser->this.pair.cdr->this.pair.car;
