@@ -15,6 +15,10 @@
 #include <stdio.h>
 
 void sfs_print_atom( object o ) {
+    if(o->type == SFS_COMPOUDS){
+        puts("#<procedure>");
+    }
+    
     if(o->type == SFS_NUMBER){
         printf("%d",o->this.number.this.integer); /* En supposant que les nombres soient tous entier*/
     }
@@ -32,7 +36,7 @@ void sfs_print_atom( object o ) {
             printf("#\\%c",o->this.character); /* ?? */
         }
     }
-    if((o->type == SFS_SYMBOL)||(o->type == SFS_INFINI)){
+    if((o->type == SFS_INFINI)||(o->type == SFS_SYMBOL)){
         printf("%s",o->this.symbol);
     }
     if(o->type == SFS_BOOLEAN){
