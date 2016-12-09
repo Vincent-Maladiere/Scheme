@@ -1,3 +1,5 @@
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -21,23 +23,25 @@ object sfs_eval( object expr, object env) {
     }
     if(expr->type == SFS_SYMBOL){
         object prim_safe = list_prim->this.pair.cdr; /* attention 'cdr' et pas 'car' pour list_prim, contrairement à env */
-        /*while(prim_safe->this.pair.car != NULL){
+        while(prim_safe->this.pair.car != NULL){
             if(strcmp(prim_safe->this.pair.car->this.pair.car->this.symbol, expr->this.symbol) == 0){
                 object result = make_object(SFS_SYMBOL);
                 strcpy(result->this.symbol,expr->this.symbol);
                 return result;
             }
             prim_safe = prim_safe->this.pair.cdr;
-        }*/
+        }
         object cherchemaggle = make_object(SFS_PAIR);
         cherchemaggle = env->this.pair.car;
         if(cherchemaggle == NULL){
             WARNING_MSG("\n\nUndefined parameter\n");
+            return NULL;
         }
         while(strcmp(cherchemaggle->this.pair.car->this.pair.car->this.symbol, expr->this.symbol) != 0){ /* PB MAGGLE */
             cherchemaggle = cherchemaggle->this.pair.cdr;
             if(cherchemaggle == NULL){
                 WARNING_MSG("\n\nUndefined parameter\n");
+                return NULL;
             }
 
         }
@@ -86,11 +90,12 @@ object sfs_eval( object expr, object env) {
             safe_env->this.pair.car = cons(expr->this.pair.cdr->this.pair.car, sfs_eval(expr->this.pair.cdr->this.pair.cdr->this.pair.car,env));
             safe_env->this.pair.cdr = env->this.pair.car;
             env->this.pair.car = safe_env;
-            expr = expr->this.pair.cdr->this.pair.car; /* Permet d'afficher la variable définie avec sfs_print */
-            return expr;
+            expr = expr->this.pair.cdr->this.pair.car;
+            return NULL;
         }
         else{
             WARNING_MSG("\n\nDefine impossible\n");
+            return NULL;
         }
     }
     if(is_form("set!", expr) == 1){
@@ -98,11 +103,13 @@ object sfs_eval( object expr, object env) {
         safe_env = env->this.pair.car; /* On ne perd pas la tête de liste ! On envoit une copie */
         if(safe_env == NULL){
             WARNING_MSG("\n\nYou can't set an undefined parameter\n");
+            return NULL;
         }
         while(strcmp(safe_env->this.pair.car->this.pair.car->this.symbol, expr->this.pair.cdr->this.pair.car->this.symbol) != 0){
             safe_env = safe_env->this.pair.cdr;
             if(safe_env == NULL){
                 WARNING_MSG("\n\nYou can't set an undefined parameter\n");
+                return NULL;
             }
         }
 
@@ -170,47 +177,37 @@ object sfs_eval( object expr, object env) {
         }
         else{
             WARNING_MSG("\n\nProblème d'arguments\n");
+            return NULL;
         }
     }
     
     if(is_form("lambda", expr) == 1){
         object env_lambda = make_lambda(expr);
         env->this.pair.cdr = env_lambda;
-        puts("#<procedure>\n");
-        return NULL;
+        return env_lambda->this.pair.car->this.pair.car;
     }
     
     if(is_form("lambda",expr->this.pair.car) == 1){
         if(expr->this.pair.cdr->this.pair.car != NULL){ /* Doute : avec ou sans this.pair.car ??*/
-            object argument = expr->this.pair.cdr;
             object env_lambda = make_lambda(expr->this.pair.car);
-            object corps = env_lambda->this.pair.car->this.pair.car->this.compound.body;
-            /*object environnement = env_lambda->this.pair.car->this.pair.car->this.compound.envt;*/
-            object environnement = make_object(SFS_PAIR);
-            environnement->this.pair.cdr = NULL;
-            environnement->this.pair.car = make_object(SFS_PAIR);
-            object environnement_safe = environnement->this.pair.car;
-            object parametres = env_lambda->this.pair.car->this.pair.car->this.compound.parms;
-            while(parametres->this.pair.cdr != NULL){
-                environnement_safe->this.pair.car = cons(parametres->this.pair.car,sfs_eval(argument->this.pair.car,env));
-                environnement_safe->this.pair.cdr = make_object(SFS_PAIR);
-                environnement_safe = environnement_safe->this.pair.cdr;
-                parametres = parametres->this.pair.cdr;
-                argument = argument->this.pair.cdr;
-            }
-            env_lambda->this.pair.car->this.pair.car->this.compound.envt = environnement;
-            return sfs_eval(corps,environnement);
+            return lambda_a_evaluer(expr, env_lambda);
         }
         WARNING_MSG("Argument d'entrée attendu");
+        return NULL;
     }
     
     else{
         object prim_safe = list_prim->this.pair.cdr;
         if(env->this.pair.car != NULL){
-            object env_safe = env;
-            while(env_safe->this.pair.cdr != NULL){
-                if(is_form(env_safe->this.pair.car->this.symbol,expr) == 1){
-                    strcpy(expr->this.pair.car->this.symbol,env_safe->this.pair.car->this.pair.cdr->this.symbol);
+            object env_safe = env->this.pair.car;
+            while(env_safe->this.pair.car != NULL){
+                if(is_form(env_safe->this.pair.car->this.pair.car->this.symbol,expr) == 1){
+                    if(env_safe->this.pair.car->this.pair.cdr->type == SFS_SYMBOL){
+                        strcpy(expr->this.pair.car->this.symbol,env_safe->this.pair.car->this.pair.cdr->this.symbol);
+                    }
+                    if(env_safe->this.pair.car->this.pair.cdr->type == SFS_COMPOUDS){
+                        return lambda_a_evaluer_apres_define(expr, env_safe);
+                    }
                 }
                 env_safe = env_safe->this.pair.cdr;
             }
@@ -233,10 +230,12 @@ object sfs_eval( object expr, object env) {
             prim_safe = prim_safe->this.pair.cdr;
         }
         WARNING_MSG("\n\nJe crains que cette fonction n'existe point \n");
+        return NULL;
     }
     
     return expr;
 }
+
 
 int is_form (char *name, object expr) {  /* detecter si c'est une forme oui==1, 0 sinon */
      if ((expr->type == SFS_PAIR) && (expr->this.pair.car->type == SFS_SYMBOL) && (0 == strcmp(name, expr->this.pair.car->this.string))){
@@ -271,4 +270,46 @@ object make_lambda(object expr){
     env_lambda_safe->this.pair.car->this.compound.body = make_object(SFS_PAIR);
     env_lambda_safe->this.pair.car->this.compound.body = corps;
     return env_lambda;
+}
+
+object lambda_a_evaluer(object expr, object env_lambda){
+    object argument = expr->this.pair.cdr;
+    object corps = env_lambda->this.pair.car->this.pair.car->this.compound.body;
+    object environnement = make_object(SFS_PAIR);
+    environnement->this.pair.cdr = NULL;
+    environnement->this.pair.car = make_object(SFS_PAIR);
+    object environnement_safe = environnement->this.pair.car;
+    object parametres = env_lambda->this.pair.car->this.pair.car->this.compound.parms;
+    while(parametres->this.pair.cdr != NULL){
+        environnement_safe->this.pair.car = cons(parametres->this.pair.car,sfs_eval(argument->this.pair.car,env));
+        environnement_safe->this.pair.cdr = make_object(SFS_PAIR);
+        environnement_safe = environnement_safe->this.pair.cdr;
+        parametres = parametres->this.pair.cdr;
+        argument = argument->this.pair.cdr;
+    }
+    env_lambda->this.pair.car->this.pair.car->this.compound.envt = environnement;
+    return sfs_eval(corps,environnement);
+}
+
+object lambda_a_evaluer_apres_define(object expr, object env_lambda){
+    object arguments = expr->this.pair.cdr;
+    object corps = env_lambda->this.pair.car->this.pair.cdr->this.compound.body;
+    object environnement = make_object(SFS_PAIR);
+    environnement->this.pair.cdr = NULL;
+    environnement->this.pair.car = make_object(SFS_PAIR);
+    object environnement_safe = environnement->this.pair.car;
+    object parametres = env_lambda->this.pair.car->this.pair.cdr->this.compound.parms;
+    while(parametres->this.pair.cdr != NULL){
+        if(arguments == NULL){
+            WARNING_MSG("\n\nIl manque des arguments d'entrée\n");
+            return NULL;
+        }
+        environnement_safe->this.pair.car = cons(parametres->this.pair.car,sfs_eval(arguments->this.pair.car,env));
+        environnement_safe->this.pair.cdr = make_object(SFS_PAIR);
+        environnement_safe = environnement_safe->this.pair.cdr;
+        parametres = parametres->this.pair.cdr;
+        arguments = arguments->this.pair.cdr;
+    }
+    env_lambda->this.pair.car->this.pair.cdr->this.compound.envt = environnement;
+    return sfs_eval(corps,environnement);
 }
