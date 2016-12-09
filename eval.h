@@ -20,7 +20,8 @@ extern "C" {
     object sfs_eval( object expr, object env );
     int is_form (char *name, object expr);
     object make_lambda(object expr);
-    
+    object lambda_a_evaluer(object expr, object env_lambda);
+    object lambda_a_evaluer_apres_define(object expr, object env_lambda);
 #ifdef __cplusplus
 }
 #endif
