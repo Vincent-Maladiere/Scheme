@@ -184,7 +184,7 @@ object sfs_eval( object expr, object env) {
     if(is_form("lambda", expr) == 1){
         object env_lambda = make_lambda(expr);
         env->this.pair.cdr = env_lambda;
-        return env_lambda->this.pair.car->this.pair.car;
+        return env_lambda->this.pair.car->this.pair.car;  /* quesct ce quon retourne ici ? le coupound ? car ca doit mettre <#closure>*/ 
     }
     
     if(is_form("lambda",expr->this.pair.car) == 1){
