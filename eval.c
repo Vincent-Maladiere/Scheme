@@ -250,7 +250,7 @@ object make_lambda(object expr){
     expr = expr->this.pair.cdr;
     object parametres = expr->this.pair.car;
     object parametres_safe = parametres;
-    object corps = expr->this.pair.cdr->this.pair.car;
+    object corps = expr->this.pair.cdr->this.pair.car;  /* cad, pour ((lambda(x) (* 2 x)), c'est donc * ? ou alors (* 2 x) ?n */
     object env_lambda = make_object(SFS_PAIR);
     object env_lambda_safe = env_lambda;
     env_lambda_safe->this.pair.car = make_object(SFS_PAIR);
@@ -273,7 +273,7 @@ object make_lambda(object expr){
 }
 
 object lambda_a_evaluer(object expr, object env_lambda){
-    object argument = expr->this.pair.cdr;
+    object argument = expr->this.pair.cdr;    
     object corps = env_lambda->this.pair.car->this.pair.car->this.compound.body;
     object environnement = make_object(SFS_PAIR);
     environnement->this.pair.cdr = NULL;
@@ -292,7 +292,7 @@ object lambda_a_evaluer(object expr, object env_lambda){
 }
 
 object lambda_a_evaluer_apres_define(object expr, object env_lambda){
-    object arguments = expr->this.pair.cdr;
+    object arguments = expr->this.pair.cdr;    
     object corps = env_lambda->this.pair.car->this.pair.cdr->this.compound.body;
     object environnement = make_object(SFS_PAIR);
     environnement->this.pair.cdr = NULL;
