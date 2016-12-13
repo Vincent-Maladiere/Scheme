@@ -1,5 +1,7 @@
 
 
+
+
 #include <stdio.h>
 /**
  * @file print.c
@@ -15,6 +17,17 @@
 #include <stdio.h>
 
 void sfs_print_atom( object o ) {
+    
+    /* Primitive ? */
+    object prim_safe = list_prim->this.pair.cdr; /* attention 'cdr' et pas 'car' pour list_prim, contrairement à env */
+   /* while(prim_safe->this.pair.car != NULL){
+        if(strcmp(prim_safe->this.pair.car->this.pair.car->this.symbol, o->this.symbol) == 0){
+            puts("#<procedure>");
+            return;
+        }
+        prim_safe = prim_safe->this.pair.cdr;
+    } */
+
     if(o->type == SFS_COMPOUDS){
         puts("#<procedure>");
     }
@@ -46,41 +59,6 @@ void sfs_print_atom( object o ) {
     return;
 }
 
-/*void sfs_print_pair_save( object o ) {
-    if(o->this.pair.car->type == SFS_PAIR){
-        printf("(");
-        sfs_print(o->this.pair.car);
-    }
-    else{
-        sfs_print(o->this.pair.car);
-        if(o->this.pair.cdr != nil){ 
-            printf(" ");
-        }
-        if(o->this.pair.cdr == nil){
-            printf(")");
-        }
-        else{
-            sfs_print(o->this.pair.cdr);
-        }
-        
-    }
-    return;
-}
-
-
-void sfs_print_pair_save_old( object o ) {
-    
-    if (o) {
-        printf("(");
-        sfs_print(o->this.pair.car);
-        printf(" ");
-        sfs_print_pair(o->this.pair.cdr);
-        printf(")");
-    }
-    else WARNING_MSG("On ne devrait pas etre la");
-    return;
-}
-*/
 
 void sfs_print_pair( object o ) {
 
