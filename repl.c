@@ -1,4 +1,5 @@
 
+
 /**
  * @file repl.c
  * @author François Cayre <cayre@yiking.(null)>
@@ -31,14 +32,18 @@ void usage_error( char *command ) {
 
 
 object nil;
-object env;
+object top_level;
 object list_prim;
+object ext_level;
+object ext_argument;
 
 void init_interpreter ( void ) {
     
     nil      = make_nil();
-    env = make_object(SFS_PAIR);
+    top_level = make_object(SFS_PAIR);
     list_prim = make_primitive();
+    ext_level = make_object(SFS_PAIR);
+    ext_argument = make_object(SFS_PAIR);
 }
 
 
@@ -139,7 +144,7 @@ int main ( int argc, char *argv[] ) {
             continue ;
         }
         
-        output = sfs_eval( sexpr );
+        output = sfs_eval( sexpr, top_level );
         if( NULL == output) {
             /* si fichier alors on sort*/
             if (mode == SCRIPT) {
