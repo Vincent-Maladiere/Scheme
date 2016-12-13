@@ -66,8 +66,11 @@ extern "C" {
 #define SFS_COMPOUDS     9
     
     extern object nil;
-    extern object env; /* environnement */
+    extern object top_level; /* environnement */
     extern object list_prim;
+    extern object ext_level;
+    extern object ext_argument;
+    
 #ifdef __cplusplus
 }
 #endif
