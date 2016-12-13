@@ -1,4 +1,5 @@
 
+
 /**
  * @file read.c
  * @author François Cayre <cayre@yiking.(null)>
@@ -354,7 +355,7 @@ object sfs_read_atom( char *input, uint *here ) {
         }
         
         else{
-            while(isdigit(input[*here])){ /*tant que des digits sont détectés, on les intègre dans le char*/
+            while(isdigit(input[*here])){ 
                 caractere[i] = input[*here];
                 i++;
                 (*here)++;
@@ -372,18 +373,21 @@ object sfs_read_atom( char *input, uint *here ) {
                     }
                 }
             }
-            if((isblank(input[*here]))||(input[*here] == ')')||(input[*here] == '\0')||(input[*here] == '(')){  /*si la fin du while est causée par un espace, c'est un nombre !*/
+            if((isblank(input[*here]))||(input[*here] == ')')||(input[*here] == '\0')||(input[*here] == '(')){
                 atom = make_object(SFS_NUMBER);
                 atom->this.number.numtype = NUM_INTEGER;
                 atom->this.number.this.integer = atoi(caractere);
             }
             else{
                 WARNING_MSG("\n Entier Invalide\n");
+                return NULL;
             }
     
         }
     }
-    if((input[*here]) == '"'){ /*boucle string*/
+    
+    /*boucle string*/
+    if((input[*here]) == '"'){
         (*here)++;
         while((isalpha(input[*here]))||(isblank(input[*here]))||(issymbol_total(input[*here]))||(isdigit(input[*here]))){
             caractere[i] = input[*here];
@@ -398,9 +402,12 @@ object sfs_read_atom( char *input, uint *here ) {
         }
         else{
             WARNING_MSG("\n String Invalide\n");
+            return NULL;
         }
     }
-    if(input[*here] == '#'){ /*boucle caractere*/
+    
+    /*boucle caractere*/
+    if(input[*here] == '#'){
         (*here)++;
         if(input[*here] == '\\'){
             (*here)++;
@@ -426,6 +433,7 @@ object sfs_read_atom( char *input, uint *here ) {
             }
             else{
                 WARNING_MSG("\n Caractère invalide\n");
+                return NULL;
             }
         }
         if((input[*here] == 't')||(input[*here] == 'f')){
@@ -437,17 +445,10 @@ object sfs_read_atom( char *input, uint *here ) {
             }
             else{
                 WARNING_MSG("\n Booléen Invalide\n");
+                return NULL;
             }
         }
     }
-    
-    /*if((input[*here] == 'q')&&(input[*here+1] == 'u')&&(input[*here+2] == 'o')&&(input[*here+3] == 't')&&(input[*here+4] == 'e')&&((input[*here+5] == ' ')||(input[*here+5] == '('))){
-        char str1[256] = {'q','u','o','t','e'};
-        atom = make_object(SFS_SYMBOL);
-        strcpy(atom->this.symbol,str1);
-        (*here) += 5;
-        return atom;
-    }*/
     
     
     if((isalpha(input[*here]))||(issymbol_partiel(input[*here]))){ /*boucle symbol*/
@@ -465,6 +466,7 @@ object sfs_read_atom( char *input, uint *here ) {
         }
         else{
             WARNING_MSG("\n Symbol Invalide\n");
+            return NULL;
         }
     }
     
