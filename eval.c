@@ -1,7 +1,5 @@
 
 
-
-
 /**
  * @file eval.c
  * @author François Cayre <cayre@yiking.(null)>
