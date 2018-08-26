@@ -1,6 +1,7 @@
 # Scheme
 SCHEME interpreter of PHELMA info project.
 This code allows to run a basic scheme console.  
+See https://schemers.org/Documents/Standards/R5RS/ for more details.
 
 ## Installing
 
